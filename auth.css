@@ -157,6 +157,36 @@
     color: #e4405f;
 }
 
+.apple .social-icon {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.github .social-icon {
+    background: rgba(110, 84, 148, 0.1);
+    color: #6e5494;
+}
+
+.github .social-icon svg,
+.discord .social-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.discord .social-icon {
+    background: rgba(88, 101, 242, 0.1);
+    color: #5865f2;
+}
+
+.discord .social-icon svg {
+    display: block;
+}
+
+.github .social-icon svg {
+    display: block;
+}
+
 .auth-switch {
     margin-top: 20px;
     color: #6a5a4a;
@@ -196,6 +226,120 @@
     color: #c0392b;
     margin-bottom: 16px;
     text-align: center;
+}
+
+.auth-error.success {
+    border-color: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.06);
+}
+
+.auth-input-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.auth-input-wrap input {
+    width: 100%;
+    padding: 13px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.auth-input-wrap input:focus {
+    border-color: rgba(192, 132, 62, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.auth-input-wrap input.error {
+    border-color: rgba(192, 57, 43, 0.3);
+    background: rgba(192, 57, 43, 0.03);
+}
+
+.auth-input-wrap input.valid {
+    border-color: rgba(76, 175, 80, 0.2);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #5a4a3a;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 4px;
+    transition: color 0.2s;
+    font-family: inherit;
+    letter-spacing: 1px;
+}
+
+.password-toggle:hover {
+    color: #c0843e;
+}
+
+.auth-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auth-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.auth-btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(192, 132, 62, 0.2);
+    border-top-color: #c0843e;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.password-strength {
+    display: flex;
+    gap: 4px;
+    margin-top: -8px;
+    margin-bottom: 4px;
+}
+
+.password-strength .bar {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.06);
+    transition: all 0.3s ease;
+}
+
+.password-strength .bar.weak { background: #c0392b; }
+.password-strength .bar.medium { background: #e67e22; }
+.password-strength .bar.strong { background: #4caf50; }
+
+.auth-field-error {
+    font-size: 0.75rem;
+    color: #c0392b;
+    margin-top: -8px;
+    padding-left: 4px;
 }
 
 .auth-forgot {

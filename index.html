@@ -33,8 +33,8 @@
         </div>
         <section class="content-section home-section">
             <h1>Note <span>In</span> Demisol</h1>
-            <p class="tagline">&#9835; Sunetul care te definește &#9835;</p>
-            <p class="desc">Sub îndrumarea lui Alex Czirai, explorăm arta chitarei împreună. Lecții, evenimente și comunitate pentru pasionații de muzică.</p>
+            <p class="tagline" id="homeTagline">&#9835; Sunetul care te definește &#9835;</p>
+            <p class="desc" id="homeDesc">Sub îndrumarea lui Alex Czirai, explorăm arta chitarei împreună. Lecții, evenimente și comunitate pentru pasionații de muzică.</p>
             <span class="scroll-hint">Deschide meniul</span>
         </section>
     </div>
@@ -42,20 +42,18 @@
     <script src="script.js"></script>
     <script>
     (function() {
+        (function() { try { var x = new XMLHttpRequest(); x.open('GET', '/api/content/site-content', false); x.send(); var c = JSON.parse(x.responseText).content || {}; if (c.home_tagline) document.getElementById('homeTagline').textContent = c.home_tagline.content; if (c.home_description) document.getElementById('homeDesc').textContent = c.home_description.content; } catch(e) {} })();
         var bar = document.getElementById('authBar');
         function render() {
             var session = NIDAuth.getSession();
             if (session) {
                 var adminLink = session.isAdmin ? '<a href="admin.html" class="auth-bar-link admin-link">Admin</a>' : '';
-                bar.innerHTML = '<span class="auth-bar-user">' + session.username + '</span>' + adminLink + '<a href="#" class="auth-bar-link" id="logoutBtn">Logout</a>';
-                var logoutBtn = document.getElementById('logoutBtn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        NIDAuth.logout();
-                        render();
-                    });
-                }
+                bar.innerHTML = '<span class="auth-bar-user">' + session.username + '</span>' + adminLink + '<a href="profile.html" class="auth-bar-link">Profil</a><a href="#" class="auth-bar-link" id="logoutBtn">Logout</a>';
+                document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    NIDAuth.logout();
+                    render();
+                });
             } else {
                 bar.innerHTML = '<a href="login.html" class="auth-bar-link">Login</a><a href="signup.html" class="auth-bar-link signup">Sign Up</a>';
             }

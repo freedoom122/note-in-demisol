@@ -1,0 +1,6 @@
+{
+  "name": "note-in-demisol-server",
+  "version": "1.0.0",
+  "description": "Backend pentru Note In Demisol",
+  "main": "server.js"
+}

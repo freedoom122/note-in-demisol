@@ -12,13 +12,7 @@
     </div>
     <div class="bg-overlay"></div>
     <div class="container">
-        <div class="menu-toggle" id="menuToggle">
-            <div class="menu-icon">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
+        <div class="menu-toggle" id="menuToggle"><div class="menu-icon"><span></span><span></span><span></span></div></div>
         <div class="menu-circle" id="menuCircle">
             <a href="index.html" class="menu-item"><span class="item-icon">&#8962;</span><span class="item-label">Acasă</span></a>
             <a href="about.html" class="menu-item"><span class="item-icon">&#9835;</span><span class="item-label">Despre</span></a>
@@ -30,28 +24,29 @@
             <a href="blog.html" class="menu-item"><span class="item-icon">&#9998;</span><span class="item-label">Blog</span></a>
             <a href="social.html" class="menu-item"><span class="item-icon">&#64;</span><span class="item-label">Social</span></a>
         </div>
-        <section class="content-section">
-            <h2>Lectii de Chitare</h2>
-            <div class="lesson-categories">
-                <div class="category">
-                    <h3>Începători</h3>
-                    <p>Pentru cei care încep de la zero - acorduri de bază, ritm și postura corectă.</p>
-                </div>
-                <div class="category">
-                    <h3>Intermediari</h3>
-                    <p>Tehnici de deplasare, gamme, improvisare și lucrării cu efecte.</p>
-                </div>
-                <div class="category">
-                    <h3>Avansați</h3>
-                    <p>Tehnici avansate, teoria muzicii aplicată, compoziție și interpretare.</p>
-                </div>
-                <div class="category">
-                    <h3>Specializate</h3>
-                    <p>Jazz, blues, rock progresiv, fingerstyle și tehnici de chitare electrice.</p>
-                </div>
+        <section class="content-section" id="lessonsSection">
+            <h2 id="lessonsTitle">Lectii de chitara</h2>
+            <div id="lessonsContent" style="line-height:1.9;color:#a09080;font-size:1rem;font-weight:300;text-align:center;max-width:700px;margin:0 auto 30px auto">Se incarca...</div>
+            <div class="lesson-categories" id="lessonsPlans">
+                <div class="category"><h3>Incepator</h3><p>Acorduri de baza, ritm si primele melodii.</p><span style="display:inline-block;margin-top:12px;color:#c0843e;font-size:0.85rem;border:1px solid rgba(192,132,62,0.2);border-radius:6px;padding:4px 10px">30 RON/sedinta</span></div>
+                <div class="category"><h3>Intermediar</h3><p>Tehnici avansate, fingerstyle si improvizatie.</p><span style="display:inline-block;margin-top:12px;color:#c0843e;font-size:0.85rem;border:1px solid rgba(192,132,62,0.2);border-radius:6px;padding:4px 10px">45 RON/sedinta</span></div>
+                <div class="category"><h3>Avansat</h3><p>Compozitie, armonie si performance coaching.</p><span style="display:inline-block;margin-top:12px;color:#c0843e;font-size:0.85rem;border:1px solid rgba(192,132,62,0.2);border-radius:6px;padding:4px 10px">60 RON/sedinta</span></div>
             </div>
         </section>
     </div>
+    <script>
+    (function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/content/site-content', false);
+        try { xhr.send(); } catch(e) {}
+        var content = {};
+        try { content = JSON.parse(xhr.responseText).content || {}; } catch(e) {}
+        if (content.lessons) {
+            var el = document.getElementById('lessonsContent');
+            if (el) el.textContent = content.lessons.content;
+        }
+    })();
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

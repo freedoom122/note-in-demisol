@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - Note In demisol</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <style>
+    .profile-layout {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        position: relative;
+        z-index: 1;
+    }
+    .profile-card {
+        width: 100%;
+        max-width: 520px;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(16px);
+        border-radius: 24px;
+        padding: 40px 36px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .profile-card h1 {
+        font-size: 1.6rem;
+        font-weight: 300;
+        color: #fff;
+        letter-spacing: 2px;
+        margin-bottom: 4px;
+    }
+    .profile-card h1 span { color: #c0843e; }
+    .profile-card .subtitle {
+        color: #8a7a6a;
+        font-size: 0.85rem;
+        letter-spacing: 2px;
+        margin-bottom: 28px;
+        text-transform: uppercase;
+    }
+    .profile-info {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .profile-info .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 0.85rem;
+    }
+    .profile-info .label { color: #6a5a4a; letter-spacing: 1px; }
+    .profile-info .value { color: #c0843e; }
+    .profile-section { margin-bottom: 28px; }
+    .profile-section h3 {
+        font-size: 0.95rem;
+        color: #fff;
+        font-weight: 400;
+        margin-bottom: 4px;
+    }
+    .profile-section .desc {
+        color: #6a5a4a;
+        font-size: 0.8rem;
+        margin-bottom: 14px;
+    }
+    .profile-msg {
+        background: rgba(192, 132, 62, 0.06);
+        border: 1px solid rgba(192, 132, 62, 0.1);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.78rem;
+        color: #c0843e;
+        margin-bottom: 14px;
+        display: none;
+        text-align: center;
+    }
+    .profile-msg.success { border-color: rgba(76, 175, 80, 0.2); color: #4caf50; background: rgba(76, 175, 80, 0.06); }
+    .profile-msg.error { border-color: rgba(192, 57, 43, 0.1); color: #c0392b; background: rgba(192, 57, 43, 0.06); }
+    .profile-back {
+        display: inline-block;
+        margin-top: 8px;
+        color: #5a4a3a;
+        font-size: 0.8rem;
+        text-decoration: none;
+        letter-spacing: 1px;
+        transition: color 0.2s;
+    }
+    .profile-back:hover { color: #8a7a6a; }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <img src="assets/background.png" alt="" class="bg-image">
+    </div>
+    <div class="bg-overlay"></div>
+    <div class="profile-layout">
+        <div class="profile-card">
+            <h1>Note <span>In</span> Demisol</h1>
+            <p class="subtitle">Setarile Contului</p>
+
+            <div class="profile-info" id="profileInfo"></div>
+
+            <div id="profileMsg" class="profile-msg"></div>
+
+            <div class="profile-section">
+                <h3>Schimba Email</h3>
+                <p class="desc">Un cod de verificare va fi trimis la emailul tau curent.</p>
+                <form class="auth-form" id="emailForm">
+                    <input type="email" id="newEmail" placeholder="Email nou" required>
+                    <button type="submit" class="auth-btn">Trimite codul</button>
+                </form>
+                <form class="auth-form" id="emailConfirmForm" style="display:none;margin-top:12px">
+                    <input type="text" id="emailCode" placeholder="Codul de verificare" required>
+                    <button type="submit" class="auth-btn">Confirma email</button>
+                </form>
+            </div>
+
+            <div class="profile-section">
+                <h3>Schimba Parola</h3>
+                <p class="desc">Un cod de verificare va fi trimis la emailul tau.</p>
+                <form class="auth-form" id="passForm">
+                    <button type="submit" class="auth-btn">Trimite codul</button>
+                </form>
+                <form class="auth-form" id="passConfirmForm" style="display:none;margin-top:12px">
+                    <input type="text" id="passCode" placeholder="Codul de verificare" required>
+                    <input type="password" id="newPass" placeholder="Parola noua (minim 6 caractere)" required>
+                    <input type="password" id="newPass2" placeholder="Confirma parola" required>
+                    <button type="submit" class="auth-btn">Schimba parola</button>
+                </form>
+            </div>
+
+            <a href="index.html" class="profile-back">&#8592; Inapoi la site</a>
+        </div>
+    </div>
+    <script src="auth.js"></script>
+    <script>
+    (function() {
+        var session = NIDAuth.getSession();
+        if (!session) { window.location.href = 'login.html'; return; }
+
+        var info = document.getElementById('profileInfo');
+        info.innerHTML = '<div class="row"><span class="label">Username</span><span class="value">' + session.username + '</span></div>' +
+            '<div class="row"><span class="label">Email</span><span class="value">' + session.email + '</span></div>' +
+            '<div class="row"><span class="label">Rol</span><span class="value">' + (session.isAdmin ? 'Admin' : 'Membru') + '</span></div>';
+
+        function showMsg(text, type) {
+            var m = document.getElementById('profileMsg');
+            m.textContent = text;
+            m.className = 'profile-msg ' + (type || '');
+            m.style.display = 'block';
+        }
+
+        var pendingNewEmail = '';
+
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var email = document.getElementById('newEmail').value;
+            var result = NIDAuth.requestEmailChange(email);
+            if (result.ok) {
+                pendingNewEmail = email;
+                showMsg('Cod trimis la emailul curent. Cod: ' + result.code, 'success');
+                document.getElementById('emailForm').style.display = 'none';
+                document.getElementById('emailConfirmForm').style.display = 'block';
+            } else {
+                showMsg(result.error, 'error');
+            }
+        });
+
+        document.getElementById('emailConfirmForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var code = document.getElementById('emailCode').value;
+            var result = NIDAuth.confirmEmailChange(code);
+            if (result.ok) {
+                showMsg('Email schimbat cu succes in ' + pendingNewEmail + '!', 'success');
+                document.getElementById('emailConfirmForm').style.display = 'none';
+                document.getElementById('emailForm').style.display = 'block';
+                document.getElementById('newEmail').value = '';
+                document.getElementById('emailCode').value = '';
+                pendingNewEmail = '';
+                session = NIDAuth.getSession();
+                info.innerHTML = '<div class="row"><span class="label">Username</span><span class="value">' + session.username + '</span></div>' +
+                    '<div class="row"><span class="label">Email</span><span class="value">' + session.email + '</span></div>' +
+                    '<div class="row"><span class="label">Rol</span><span class="value">' + (session.isAdmin ? 'Admin' : 'Membru') + '</span></div>';
+            } else {
+                showMsg(result.error, 'error');
+            }
+        });
+
+        document.getElementById('passForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var result = NIDAuth.requestPasswordChange();
+            if (result.ok) {
+                showMsg('Cod trimis la ' + session.email + '. Cod: ' + result.code, 'success');
+                document.getElementById('passForm').style.display = 'none';
+                document.getElementById('passConfirmForm').style.display = 'block';
+            } else {
+                showMsg(result.error, 'error');
+            }
+        });
+
+        document.getElementById('passConfirmForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var code = document.getElementById('passCode').value;
+            var pass = document.getElementById('newPass').value;
+            var pass2 = document.getElementById('newPass2').value;
+            if (pass !== pass2) { showMsg('Parolele nu coincid', 'error'); return; }
+            var result = NIDAuth.confirmPasswordChange(code, pass);
+            if (result.ok) {
+                showMsg('Parola schimbata cu succes!', 'success');
+                document.getElementById('passConfirmForm').style.display = 'none';
+                document.getElementById('passForm').style.display = 'block';
+                document.getElementById('passCode').value = '';
+                document.getElementById('newPass').value = '';
+                document.getElementById('newPass2').value = '';
+            } else {
+                showMsg(result.error, 'error');
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

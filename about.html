@@ -12,13 +12,7 @@
     </div>
     <div class="bg-overlay"></div>
     <div class="container">
-        <div class="menu-toggle" id="menuToggle">
-            <div class="menu-icon">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
+        <div class="menu-toggle" id="menuToggle"><div class="menu-icon"><span></span><span></span><span></span></div></div>
         <div class="menu-circle" id="menuCircle">
             <a href="index.html" class="menu-item"><span class="item-icon">&#8962;</span><span class="item-label">Acasă</span></a>
             <a href="about.html" class="menu-item"><span class="item-icon">&#9835;</span><span class="item-label">Despre</span></a>
@@ -30,13 +24,23 @@
             <a href="blog.html" class="menu-item"><span class="item-icon">&#9998;</span><span class="item-label">Blog</span></a>
             <a href="social.html" class="menu-item"><span class="item-icon">&#64;</span><span class="item-label">Social</span></a>
         </div>
-        <section class="content-section">
-            <h2>Despre Noi</h2>
-            <p>Suntem un grup pasionat de chitare, deducat artiștii muzicii și invățătării. Sub conducerea lui Alex Czirai, oferim lectii personalizate și experiențe muzicale unice.</p>
-            <p>Misiunea noastră este să inspirăm și să educăm generația viitoare de chitariști prin metode inovatoare și o abordare personalizată a învățării.</p>
-            <p>Fiecare membru al grupului aduce o contribuție unică, combinând tehnică impecabilă cu pasiune autentică pentru muzică.</p>
+        <section class="content-section" id="aboutSection">
+            <h2 id="aboutTitle">Despre Noi</h2>
+            <p id="aboutContent" style="line-height:1.9;color:#a09080;font-size:1rem;font-weight:300;text-align:center;max-width:700px;margin:0 auto">Se incarca...</p>
         </section>
     </div>
+    <script>
+    (function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/content/site-content', false);
+        try { xhr.send(); } catch(e) {}
+        var content = {};
+        try { content = JSON.parse(xhr.responseText).content || {}; } catch(e) {}
+        if (content.about) {
+            document.getElementById('aboutContent').textContent = content.about.content;
+        }
+    })();
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

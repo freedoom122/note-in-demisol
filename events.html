@@ -32,25 +32,43 @@
         </div>
         <section class="content-section">
             <h2>Evenimente</h2>
-            <div class="events-timeline">
-                <div class="event">
-                    <h3>Concert de Primăvară</h3>
-                    <p>15 Mai 2026 - Sala Concerturilor</p>
-                    <p>Performanță live cu repertoriu clasic și modern</p>
-                </div>
-                <div class="event">
-                    <h3>Workshop Tehnici Avansate</h3>
-                    <p>1-3 iunie 2026 - Studioul Nostru</p>
-                    <p>Tehnici de sweep picking, tapping și legato</p>
-                </div>
-                <div class="event">
-                    <h3>Festival de Chitare</h3>
-                    <p>20-22 iulie 2026 - Parcul Central</p>
-                    <p>Concerte, workshop-uri și jam sessions</p>
-                </div>
+            <div class="events-timeline" id="eventsList">
+                <p style="text-align:center;color:#5a4a3a">Se incarca...</p>
             </div>
         </section>
     </div>
+    <script src="auth.js"></script>
+    <script>
+    (function() {
+        var list = document.getElementById('eventsList');
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/events', false);
+        try { xhr.send(); } catch(e) {}
+        var events = [];
+        try { events = JSON.parse(xhr.responseText).events || []; } catch(e) {}
+        var now = new Date();
+        var upcoming = events.filter(function(ev) {
+            var end = ev.endDate ? new Date(ev.endDate + 'T' + (ev.endTime || '23:59')) : null;
+            return !end || end >= now;
+        });
+        if (!upcoming.length) {
+            list.innerHTML = '<p style="text-align:center;color:#5a4a3a">Momentan nu sunt evenimente planificate.</p>';
+        } else {
+            list.innerHTML = '';
+            upcoming.forEach(function(ev) {
+                var dateStr = ev.date;
+                if (ev.endDate && ev.endDate !== ev.date) dateStr += ' - ' + ev.endDate;
+                var timeStr = (ev.startTime || '') + (ev.endTime ? ' - ' + ev.endTime : '');
+                var dateTimeStr = dateStr + (timeStr ? ' | ' + timeStr : '');
+                list.innerHTML += '<div class="event">' +
+                    '<h3>' + ev.name + '</h3>' +
+                    '<p>' + dateTimeStr + ' - ' + ev.location + '</p>' +
+                    (ev.description ? '<p>' + ev.description + '</p>' : '') +
+                    '</div>';
+            });
+        }
+    })();
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

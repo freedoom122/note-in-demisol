@@ -12,13 +12,7 @@
     </div>
     <div class="bg-overlay"></div>
     <div class="container">
-        <div class="menu-toggle" id="menuToggle">
-            <div class="menu-icon">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
+        <div class="menu-toggle" id="menuToggle"><div class="menu-icon"><span></span><span></span><span></span></div></div>
         <div class="menu-circle" id="menuCircle">
             <a href="index.html" class="menu-item"><span class="item-icon">&#8962;</span><span class="item-label">Acasă</span></a>
             <a href="about.html" class="menu-item"><span class="item-icon">&#9835;</span><span class="item-label">Despre</span></a>
@@ -32,33 +26,54 @@
         </div>
         <section class="content-section">
             <h2>Contact</h2>
-            <div class="contact-info">
-                <div class="info-item">
-                    <h3>Email</h3>
-                    <p>contact@noteindemisol.ro</p>
-                </div>
-                <div class="info-item">
-                    <h3>Telefon</h3>
-                    <p>+40 7XX XXX XXX</p>
-                </div>
-                <div class="info-item">
-                    <h3>Adresa</h3>
-                    <p>Str. Muzicii, Nr. 123, București</p>
-                </div>
-                <div class="info-item">
-                    <h3>Urmărește-ne</h3>
-                    <p>Facebook | Instagram | YouTube</p>
-                </div>
+            <div class="contact-info" id="contactInfo">
+                <div class="info-item"><h3>Email</h3><p id="ci_email">Se incarca...</p></div>
+                <div class="info-item"><h3>Telefon</h3><p id="ci_phone">Se incarca...</p></div>
+                <div class="info-item"><h3>Adresa</h3><p id="ci_address">Se incarca...</p></div>
             </div>
-            <form class="contact-form">
+            <form class="contact-form" id="contactForm">
                 <h3>Trimite-ne un mesaj</h3>
-                <input type="text" placeholder="Numele tău" required>
-                <input type="email" placeholder="Email-ul tău" required>
-                <textarea placeholder="Mesajul tău" required></textarea>
-                <button type="submit">Trimite Mesaj</button>
+                <div id="contactMsg" style="display:none;background:rgba(76,175,80,0.06);border:1px solid rgba(76,175,80,0.2);border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#4caf50;margin-bottom:16px;text-align:center"></div>
+                <input type="text" id="cfName" placeholder="Numele tau" required>
+                <input type="email" id="cfEmail" placeholder="Email-ul tau" required>
+                <textarea id="cfMessage" placeholder="Mesajul tau" required></textarea>
+                <button type="submit" id="cfBtn">Trimite Mesaj</button>
             </form>
         </section>
     </div>
+    <script>
+    (function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/content/site-content', false);
+        try { xhr.send(); } catch(e) {}
+        var content = {};
+        try { content = JSON.parse(xhr.responseText).content || {}; } catch(e) {}
+        if (content.contact_email) document.getElementById('ci_email').textContent = content.contact_email.content;
+        if (content.contact_phone) document.getElementById('ci_phone').textContent = content.contact_phone.content;
+        if (content.contact_address) document.getElementById('ci_address').textContent = content.contact_address.content;
+
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var msgDiv = document.getElementById('contactMsg');
+            var name = document.getElementById('cfName').value.trim();
+            var email = document.getElementById('cfEmail').value.trim();
+            var message = document.getElementById('cfMessage').value.trim();
+            if (!name || !email || !message) { msgDiv.textContent = 'Completeaza toate campurile'; msgDiv.style.color = '#c0392b'; msgDiv.style.borderColor = 'rgba(192,57,43,0.2)'; msgDiv.style.background = 'rgba(192,57,43,0.06)'; msgDiv.style.display = 'block'; return; }
+            var xhr2 = new XMLHttpRequest();
+            xhr2.open('POST', '/api/content/contact-messages', false);
+            xhr2.setRequestHeader('Content-Type', 'application/json');
+            xhr2.send(JSON.stringify({ name: name, email: email, message: message }));
+            msgDiv.textContent = 'Mesajul tau a fost trimis cu succes!';
+            msgDiv.style.color = '#4caf50';
+            msgDiv.style.borderColor = 'rgba(76,175,80,0.2)';
+            msgDiv.style.background = 'rgba(76,175,80,0.06)';
+            msgDiv.style.display = 'block';
+            document.getElementById('cfName').value = '';
+            document.getElementById('cfEmail').value = '';
+            document.getElementById('cfMessage').value = '';
+        });
+    })();
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

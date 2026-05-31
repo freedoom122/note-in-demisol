@@ -325,6 +325,32 @@
     font-style: italic;
 }
 
+.user-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: #a09080;
+    font-size: 0.8rem;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+}
+
+.user-dropdown-item:hover {
+    background: rgba(192, 132, 62, 0.08);
+    color: #c0843e;
+}
+
+.user-dropdown-item .disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
 /* Denied Page Error 446 */
 .denied-page {
     min-height: 100vh;
@@ -414,4 +440,18 @@
 .denied-btn.secondary:hover {
     background: rgba(255, 255, 255, 0.05);
     color: #8a7a6a;
+}
+
+.event-expired td {
+    opacity: 0.5;
+}
+
+.event-expired .event-name {
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.event-expired .event-name:hover {
+    color: #c0843e;
 }

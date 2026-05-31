@@ -12,13 +12,7 @@
     </div>
     <div class="bg-overlay"></div>
     <div class="container">
-        <div class="menu-toggle" id="menuToggle">
-            <div class="menu-icon">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
+        <div class="menu-toggle" id="menuToggle"><div class="menu-icon"><span></span><span></span><span></span></div></div>
         <div class="menu-circle" id="menuCircle">
             <a href="index.html" class="menu-item"><span class="item-icon">&#8962;</span><span class="item-label">Acasă</span></a>
             <a href="about.html" class="menu-item"><span class="item-icon">&#9835;</span><span class="item-label">Despre</span></a>
@@ -32,28 +26,26 @@
         </div>
         <section class="content-section">
             <h2>Blog</h2>
-            <div class="blog-posts">
-                <div class="post">
-                    <h3>5 Tehnici Esențiale pentru Chitariști Începători</h3>
-                    <p>Publicat: 10 Mai 2026</p>
-                    <p>Descoperi cele mai importante tehnici pe care le trebuie să le maîtricești pentru a începe drumul tău de chitară.</p>
-                    <a href="#" class="read-more">Citește mai mult →</a>
-                </div>
-                <div class="post">
-                    <h3>Cum să Alege Prima Ta Chitară Electrică</h3>
-                    <p>Publicat: 3 Mai 2026</p>
-                    <p>Un ghid practic pentru a selecta prima chitară electrică potrivită nevoilor tale și bugetului tău.</p>
-                    <a href="#" class="read-more">Citește mai mult →</a>
-                </div>
-                <div class="post">
-                    <h3>Teoria Muzicii Simplificată pentru Chitariști</h3>
-                    <p>Publicat: 25 Aprilie 2026</p>
-                    <p>Înțelege gamelor, acordele și progresiunile fără să te încăpățâne în termeni complicati.</p>
-                    <a href="#" class="read-more">Citește mai mult →</a>
-                </div>
-            </div>
+            <div class="blog-posts" id="blogList"><p style="text-align:center;color:#5a4a3a">Se incarca...</p></div>
         </section>
     </div>
+    <script>
+    (function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/content/blog', false);
+        try { xhr.send(); } catch(e) {}
+        var posts = [];
+        try { posts = JSON.parse(xhr.responseText).posts || []; } catch(e) {}
+        var list = document.getElementById('blogList');
+        if (!posts.length) { list.innerHTML = '<p style="text-align:center;color:#5a4a3a">Nicio postare inca.</p>'; }
+        else {
+            list.innerHTML = '';
+            posts.forEach(function(p) {
+                list.innerHTML += '<div class="post"><h3>' + p.title + '</h3><p>' + p.date + (p.author ? ' — ' + p.author : '') + '</p><p>' + p.content + '</p></div>';
+            });
+        }
+    })();
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

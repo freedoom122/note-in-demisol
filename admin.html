@@ -36,6 +36,22 @@
                     <span class="nav-icon">&#128683;</span>
                     <span>Banuri</span>
                 </a>
+                <a href="#" class="admin-nav-item" data-section="trash">
+                    <span class="nav-icon">&#128465;</span>
+                    <span>Cos</span>
+                </a>
+                <a href="#" class="admin-nav-item" data-section="blog">
+                    <span class="nav-icon">&#9998;</span>
+                    <span>Blog</span>
+                </a>
+                <a href="#" class="admin-nav-item" data-section="pages">
+                    <span class="nav-icon">&#128196;</span>
+                    <span>Pagini</span>
+                </a>
+                <a href="#" class="admin-nav-item" data-section="contact-msgs">
+                    <span class="nav-icon">&#9993;</span>
+                    <span>Mesaje</span>
+                </a>
                 <a href="#" class="admin-nav-item" data-section="settings">
                     <span class="nav-icon">&#9881;</span>
                     <span>Setari</span>
@@ -67,6 +83,7 @@
     <script src="auth.js"></script>
     <script>
     (function() {
+        var API = '/api';
         var session = NIDAuth.getSession();
         if (!session || !session.isAdmin) {
             document.getElementById('adminDenied').style.display = '';
@@ -74,38 +91,68 @@
             return;
         }
         document.getElementById('adminStatus').textContent = 'Bine ai venit, ' + session.username;
-        var events = JSON.parse(localStorage.getItem('nid_events')) || [
-            { id: 1, name: 'Concert de Primavara', date: '15 Mai 2026', location: 'Sala Concerturilor', desc: 'Performanta live cu repertoriu clasic si modern' },
-            { id: 2, name: 'Workshop Tehnici Avansate', date: '1-3 Iun 2026', location: 'Studioul Nostru', desc: 'Tehnici de sweep picking, tapping si legato' },
-            { id: 3, name: 'Festival de Chitare', date: '20-22 Iul 2026', location: 'Parcul Central', desc: 'Concerte, workshop-uri si jam sessions' }
-        ];
-        var subscribers = JSON.parse(localStorage.getItem('nid_subscribers')) || [];
-        var bannedIPs = JSON.parse(localStorage.getItem('nid_banned')) || [];
+
+        function apiSync(path, method, body) {
+            var xhr = new XMLHttpRequest();
+            xhr.open(method || 'GET', API + path, false);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            var token = localStorage.getItem('nid_jwt');
+            if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            try {
+                xhr.send(body ? JSON.stringify(body) : null);
+                return JSON.parse(xhr.responseText);
+            } catch(e) {
+                return { ok: false, error: 'Eroare de conexiune' };
+            }
+        }
+
+        function getEvents() { return apiSync('/admin/events', 'GET').events || []; }
+        function getUsers() { return apiSync('/admin/users', 'GET').users || []; }
+        function getSubscribers() { return apiSync('/admin/subscribers', 'GET').subscribers || []; }
+        function getBans() { return apiSync('/admin/bans', 'GET').bans || []; }
+        function getStats() { return apiSync('/admin/stats', 'GET').stats || {}; }
+
         var currentSection = 'dashboard';
-        function saveEvents() { localStorage.setItem('nid_events', JSON.stringify(events)); }
-        function saveSubscribers() { localStorage.setItem('nid_subscribers', JSON.stringify(subscribers)); }
-        function saveBans() { localStorage.setItem('nid_banned', JSON.stringify(bannedIPs)); }
+
         function renderSection(section) {
             currentSection = section;
             document.querySelectorAll('.admin-nav-item').forEach(function(el) { el.classList.remove('active'); });
             document.querySelector('.admin-nav-item[data-section="' + section + '"]').classList.add('active');
             var content = document.getElementById('adminContent');
+
             if (section === 'dashboard') {
+                var stats = getStats();
                 content.innerHTML = '<div class="admin-cards-row">' +
-                    '<div class="admin-stat-card"><span class="stat-num">' + events.length + '</span><span class="stat-label">Evenimente</span></div>' +
-                    '<div class="admin-stat-card"><span class="stat-num">' + (NIDAuth.getAllUsers().length || 0) + '</span><span class="stat-label">Utilizatori</span></div>' +
-                    '<div class="admin-stat-card"><span class="stat-num">' + subscribers.length + '</span><span class="stat-label">Subscriptii</span></div>' +
-                    '<div class="admin-stat-card"><span class="stat-num">' + bannedIPs.length + '</span><span class="stat-label">IP-uri blocate</span></div>' +
+                    '<div class="admin-stat-card"><span class="stat-num">' + (stats.events || 0) + '</span><span class="stat-label">Evenimente</span></div>' +
+                    '<div class="admin-stat-card"><span class="stat-num">' + (stats.users || 0) + '</span><span class="stat-label">Utilizatori</span></div>' +
+                    '<div class="admin-stat-card"><span class="stat-num">' + (stats.subscribers || 0) + '</span><span class="stat-label">Subscriptii</span></div>' +
+                    '<div class="admin-stat-card"><span class="stat-num">' + (stats.bans || 0) + '</span><span class="stat-label">IP-uri blocate</span></div>' +
                     '</div>' +
-                    '<div class="admin-card"><h3>Activitate recenta</h3><p>Sistemul functioneaza normal. ' + events.length + ' evenimente active, ' + bannedIPs.length + ' IP-uri blocate.</p></div>';
+                    '<div class="admin-card"><h3>Activitate recenta</h3><p>Sistemul functioneaza normal. ' + (stats.events || 0) + ' evenimente active, ' + (stats.bans || 0) + ' IP-uri blocate.</p></div>';
+
             } else if (section === 'events') {
-                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Evenimente</h3><button class="admin-btn" onclick="addEvent()">+ Adauga eveniment</button></div>';
+                var events = getEvents();
+                var now = new Date();
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Evenimente</h3><button class="admin-btn" onclick="showEventForm(null)">+ Adauga eveniment</button></div>';
+                html += '<div id="eventForm" style="display:none"></div>';
                 if (!events.length) { html += '<p class="admin-empty">Nu exista evenimente.</p>'; }
                 else {
-                    html += '<table class="admin-table"><thead><tr><th>Nume</th><th>Data</th><th>Locatie</th><th>Actiuni</th></tr></thead><tbody>';
+                    html += '<table class="admin-table"><thead><tr><th>Nume</th><th>Data</th><th>Ora</th><th>Locatie</th><th>Status</th><th>Actiuni</th></tr></thead><tbody>';
                     events.forEach(function(ev) {
-                        html += '<tr><td>' + ev.name + '</td><td>' + ev.date + '</td><td>' + ev.location + '</td><td>' +
-                            '<button class="admin-btn small" onclick="editEvent(' + ev.id + ')">Editeaza</button> ' +
+                        var endDateTime = ev.endDate ? new Date(ev.endDate + 'T' + (ev.endTime || '23:59')) : null;
+                        var expired = endDateTime && endDateTime < now;
+                        var statusHtml = expired ? '<span class="admin-badge" style="background:rgba(192,57,43,0.1);color:#c0392b">Expirat</span>' : '<span class="admin-badge" style="background:rgba(76,175,80,0.1);color:#4caf50">Activ</span>';
+                        var dateStr = ev.date;
+                        if (ev.endDate && ev.endDate !== ev.date) dateStr += ' - ' + ev.endDate;
+                        var timeStr = (ev.startTime || '') + (ev.endTime ? ' - ' + ev.endTime : '');
+                        html += '<tr class="' + (expired ? 'event-expired' : '') + '">' +
+                            '<td><span class="event-name" onclick="inlineEdit(' + ev.id + ')">' + ev.name + '</span></td>' +
+                            '<td>' + dateStr + '</td>' +
+                            '<td>' + timeStr + '</td>' +
+                            '<td>' + ev.location + '</td>' +
+                            '<td>' + statusHtml + '</td>' +
+                            '<td>' +
+                            '<button class="admin-btn small" onclick="showEventForm(' + ev.id + ')">Editeaza</button> ' +
                             '<button class="admin-btn small danger" onclick="deleteEvent(' + ev.id + ')">Sterge</button></td></tr>';
                     });
                     html += '</tbody></table>';
@@ -115,41 +162,67 @@
                 events.forEach(function(ev) { html += '<option value="' + ev.id + '">' + ev.name + '</option>'; });
                 html += '</select><button class="admin-btn" onclick="sendNotification()" style="margin-top:10px">Trimite email</button></div>';
                 content.innerHTML = html;
+
             } else if (section === 'users') {
-                var users = NIDAuth.getAllUsers();
+                var users = getUsers();
                 var html = '<div class="admin-card"><div class="admin-card-header"><h3>Utilizatori inregistrati</h3><span class="admin-badge">' + users.length + ' total</span></div>';
                 if (!users.length) { html += '<p class="admin-empty">Nu exista utilizatori.</p>'; }
                 else {
                     html += '<table class="admin-table"><thead><tr><th>Username</th><th>Email</th><th>Data</th><th>Rol</th><th>Actiuni</th></tr></thead><tbody>';
                     users.forEach(function(u) {
-                        var roleBadge = u.isAdmin ? '<span class="admin-badge admin">Admin</span>' : '<span class="admin-badge member">Membru</span>';
-                        var actionBtn = u.isAdmin ? '<span class="admin-text-muted">deja admin</span>' : '<button class="admin-btn small" onclick="promoteUser(\'' + u.username + '\')">Promoveaza</button>';
-                        if (u.username === 'alexczirai' || u.username === 'marcuadmin') actionBtn = '<span class="admin-text-muted">admin permanent</span>';
-                        html += '<tr><td>' + u.username + '</td><td>' + u.email + '</td><td>' + new Date(u.createdAt).toLocaleDateString('ro-RO') + '</td><td>' + roleBadge + '</td><td>' + actionBtn + '</td></tr>';
+                        var roleBadge = u.isAdmin
+                            ? '<span class="user-badge admin-badge-admin" style="background:rgba(192,57,43,0.15);color:#e74c3c;border:1px solid #f1c40f;padding:3px 10px;border-radius:6px;font-size:0.7rem;letter-spacing:1px;text-transform:uppercase">Admin</span>'
+                            : '<span class="user-badge" style="background:rgba(52,152,219,0.1);color:#3498db;border:none;padding:3px 10px;border-radius:6px;font-size:0.7rem;letter-spacing:1px;text-transform:uppercase">Membru</span>';
+                        var rowStyle = u.isAdmin
+                            ? 'style="background:rgba(192,57,43,0.06);outline:1px solid rgba(241,196,15,0.3);outline-offset:-1px"'
+                            : '';
+                        html += '<tr ' + rowStyle + '>' +
+                            '<td>' + u.username + '</td>' +
+                            '<td>' + u.email + '</td>' +
+                            '<td>' + new Date(u.createdAt).toLocaleDateString('ro-RO') + '</td>' +
+                            '<td>' + roleBadge + '</td>' +
+                            '<td style="position:relative">' +
+                            '<button class="admin-btn small user-menu-btn" onclick="toggleUserMenu(event, \'' + u.username + '\', ' + u.isAdmin + ')" style="font-size:1.2rem;letter-spacing:0;padding:4px 10px">&#8942;</button>' +
+                            '<div class="user-dropdown" id="userMenu_' + u.username + '" style="display:none;position:absolute;right:0;top:100%;background:#1a1a2e;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:6px;z-index:100;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,0.4)">' +
+                            '<button class="user-dropdown-item" onclick="banUserQuick(\'' + u.username + '\')">&#128683; Ban user</button>' +
+                            (u.isAdmin
+                                ? '<span class="user-dropdown-item disabled" style="opacity:0.3;cursor:not-allowed">&#128081; Deja admin</span>'
+                                : '<button class="user-dropdown-item" onclick="promoteUser(\'' + u.username + '\')">&#128081; Make admin</button>') +
+                            '<button class="user-dropdown-item" onclick="editUserEmail(\'' + u.username + '\')">&#9993; Change email</button>' +
+                            '</div></td></tr>';
                     });
                     html += '</tbody></table>';
                 }
                 html += '</div>';
                 content.innerHTML = html;
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.user-menu-btn') && !e.target.closest('.user-dropdown')) {
+                        document.querySelectorAll('.user-dropdown').forEach(function(m) { m.style.display = 'none'; });
+                    }
+                });
+
             } else if (section === 'subscriptions') {
+                var subscribers = getSubscribers();
                 var html = '<div class="admin-card"><div class="admin-card-header"><h3>Subscriptii la newsletter</h3><button class="admin-btn" onclick="addSubscriber()">+ Adauga manual</button></div>';
                 if (!subscribers.length) { html += '<p class="admin-empty">Nu exista subscriptii.</p>'; }
                 else {
                     html += '<table class="admin-table"><thead><tr><th>Email</th><th>Data</th><th>Actiuni</th></tr></thead><tbody>';
-                    subscribers.forEach(function(s, i) {
-                        html += '<tr><td>' + s.email + '</td><td>' + s.date + '</td><td><button class="admin-btn small danger" onclick="deleteSubscriber(' + i + ')">Sterge</button></td></tr>';
+                    subscribers.forEach(function(s) {
+                        html += '<tr><td>' + s.email + '</td><td>' + s.date + '</td><td><button class="admin-btn small danger" onclick="deleteSubscriber(' + s.id + ')">Sterge</button></td></tr>';
                     });
                     html += '</tbody></table>';
                 }
                 html += '</div>';
                 content.innerHTML = html;
+
             } else if (section === 'bans') {
-                var html = '<div class="admin-card"><div class="admin-card-header"><h3>IP-uri blocate</h3><button class="admin-btn" onclick="banIP()">+ Blocheaza IP</button></div>';
-                if (!bannedIPs.length) { html += '<p class="admin-empty">Nu exista IP-uri blocate.</p>'; }
+                var bans = getBans();
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Identificatori blocati</h3><button class="admin-btn" onclick="banIdentifier()">+ Blocheaza</button></div>';
+                if (!bans.length) { html += '<p class="admin-empty">Nu exista intrari blocate.</p>'; }
                 else {
-                    html += '<table class="admin-table"><thead><tr><th>Adresa IP</th><th>Data blocarii</th><th>Motiv</th><th>Actiuni</th></tr></thead><tbody>';
-                    bannedIPs.forEach(function(b, i) {
-                        html += '<tr><td>' + b.ip + '</td><td>' + b.date + '</td><td>' + (b.reason || 'Nespecificat') + '</td><td><button class="admin-btn small" onclick="unbanIP(' + i + ')">Deblocheaza</button></td></tr>';
+                    html += '<table class="admin-table"><thead><tr><th>Identificator</th><th>Data blocarii</th><th>Motiv</th><th>Actiuni</th></tr></thead><tbody>';
+                    bans.forEach(function(b) {
+                        html += '<tr><td>' + b.identifier + '</td><td>' + b.date + '</td><td>' + (b.reason || 'Nespecificat') + '</td><td><button class="admin-btn small" onclick="unbanIdentifier(' + b.id + ')">Deblocheaza</button></td></tr>';
                     });
                     html += '</tbody></table>';
                 }
@@ -158,11 +231,87 @@
                     '<div style="display:flex;gap:10px"><input type="text" id="banUsername" class="admin-input" placeholder="Username" style="flex:1;margin:0">' +
                     '<button class="admin-btn" onclick="banByUsername()">Blocheaza</button></div></div>';
                 content.innerHTML = html;
+
+            } else if (section === 'blog') {
+                var posts = apiSync('/content/admin/blog', 'GET').posts || [];
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Articole Blog</h3><button class="admin-btn" onclick="showBlogForm(null)">+ Articol nou</button></div>';
+                html += '<div id="blogForm" style="display:none"></div>';
+                if (!posts.length) { html += '<p class="admin-empty">Nu exista articole.</p>'; }
+                else {
+                    html += '<table class="admin-table"><thead><tr><th>Titlu</th><th>Data</th><th>Autor</th><th>Actiuni</th></tr></thead><tbody>';
+                    posts.forEach(function(p) {
+                        html += '<tr><td>' + p.title + '</td><td>' + p.date + '</td><td>' + (p.author || '') + '</td><td>' +
+                            '<button class="admin-btn small" onclick="showBlogForm(' + p.id + ')">Editeaza</button> ' +
+                            '<button class="admin-btn small danger" onclick="deleteBlogPost(' + p.id + ')">Sterge</button></td></tr>';
+                    });
+                    html += '</tbody></table>';
+                }
+                html += '</div>';
+                content.innerHTML = html;
+
+            } else if (section === 'pages') {
+                var siteContent = apiSync('/content/site-content', 'GET').content || {};
+                var pages = [
+                    { key: 'about', label: 'Despre Noi' },
+                    { key: 'home_tagline', label: 'Tagline Homepage' },
+                    { key: 'home_description', label: 'Descriere Homepage' },
+                    { key: 'contact_email', label: 'Email Contact' },
+                    { key: 'contact_phone', label: 'Telefon Contact' },
+                    { key: 'contact_address', label: 'Adresa' },
+                    { key: 'lessons', label: 'Continut Lectii' },
+                    { key: 'social_facebook', label: 'Link Facebook' },
+                    { key: 'social_youtube', label: 'Link YouTube' },
+                    { key: 'social_instagram', label: 'Link Instagram' },
+                    { key: 'social_tiktok', label: 'Link TikTok' }
+                ];
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Continut Site</h3></div>';
+                pages.forEach(function(pg) {
+                    var data = siteContent[pg.key] || { title: '', content: '' };
+                    var isLong = pg.key === 'about' || pg.key === 'lessons';
+                    html += '<div class="admin-setting" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.03)">' +
+                        '<label>' + pg.label + '</label>' +
+                        '<input type="text" id="pg_' + pg.key + '" class="admin-input" value="' + (isLong ? '' : (data.content || '').replace(/"/g, '&quot;')) + '" style="' + (isLong ? 'display:none' : '') + '">' +
+                        (isLong ? '<textarea id="pg_' + pg.key + '" class="admin-input" style="height:120px">' + (data.content || '').replace(/</g, '&lt;') + '</textarea>' : '') +
+                        '<button class="admin-btn small" onclick="savePageContent(\'' + pg.key + '\')">Salveaza</button></div>';
+                });
+                html += '</div>';
+                content.innerHTML = html;
+
+            } else if (section === 'contact-msgs') {
+                var msgs = apiSync('/content/contact-messages', 'GET').messages || [];
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Mesaje primite</h3><span class="admin-badge">' + msgs.length + ' total</span></div>';
+                if (!msgs.length) { html += '<p class="admin-empty">Niciun mesaj primit.</p>'; }
+                else {
+                    html += '<table class="admin-table"><thead><tr><th>Nume</th><th>Email</th><th>Mesaj</th><th>Data</th></tr></thead><tbody>';
+                    msgs.forEach(function(m) {
+                        html += '<tr><td>' + m.name + '</td><td>' + m.email + '</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + m.message + '</td><td>' + (m.date ? new Date(m.date).toLocaleDateString('ro-RO') : '') + '</td></tr>';
+                    });
+                    html += '</tbody></table>';
+                }
+                html += '</div>';
+                content.innerHTML = html;
+
+            } else if (section === 'trash') {
+                var trashed = apiSync('/admin/events/trash', 'GET').events || [];
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Cos de gunoi</h3><span class="admin-badge">' + trashed.length + ' evenimente</span></div>';
+                if (!trashed.length) { html += '<p class="admin-empty">Cosul este gol.</p>'; }
+                else {
+                    html += '<table class="admin-table"><thead><tr><th>Nume</th><th>Data</th><th>Locatie</th><th>Stearsa</th><th>Actiuni</th></tr></thead><tbody>';
+                    trashed.forEach(function(ev) {
+                        html += '<tr><td>' + ev.name + '</td><td>' + ev.date + '</td><td>' + ev.location + '</td><td>' + (ev.trashedAt ? new Date(ev.trashedAt).toLocaleDateString('ro-RO') : '') + '</td><td>' +
+                            '<button class="admin-btn small" onclick="restoreEvent(' + ev.id + ')">Restabileste</button> ' +
+                            '<button class="admin-btn small danger" onclick="permanentDeleteEvent(' + ev.id + ')">Sterge definitiv</button></td></tr>';
+                    });
+                    html += '</tbody></table>';
+                }
+                html += '</div>';
+                content.innerHTML = html;
+
             } else if (section === 'settings') {
                 content.innerHTML = '<div class="admin-card"><h3>Setari generale</h3>' +
-                    '<div class="admin-setting"><label>Nume site</label><input type="text" class="admin-input" value="Note In Demisol"></div>' +
-                    '<div class="admin-setting"><label>Email contact</label><input type="email" class="admin-input" value="contact@noteindemisol.ro"></div>' +
-                    '<button class="admin-btn" onclick="alert(\'Setarile au fost salvate (demonstrativ)\')">Salveaza setarile</button></div>' +
+                    '<div class="admin-setting"><label>Nume site</label><input type="text" class="admin-input" value="Note In Demisol" disabled style="opacity:0.5"></div>' +
+                    '<div class="admin-setting"><label>Email contact</label><input type="email" class="admin-input" value="contact@noteindemisol.ro" disabled style="opacity:0.5"></div>' +
+                    '<p class="admin-text-muted">Setarile pot fi modificate direct pe server.</p></div>' +
                     '<div class="admin-card"><h3>Export date</h3><p>Exporta lista de utilizatori sau subscriptii.</p>' +
                     '<button class="admin-btn" onclick="exportUsers()">Exporta utilizatori</button> ' +
                     '<button class="admin-btn" onclick="exportSubscribers()">Exporta subscriptii</button></div>' +
@@ -171,109 +320,202 @@
             }
         }
 
-        window.addEvent = function() {
-            var name = prompt('Numele evenimentului:');
-            if (!name) return;
-            var date = prompt('Data evenimentului:');
-            if (!date) return;
-            var location = prompt('Locatia:');
-            if (!location) return;
-            var desc = prompt('Descriere (optional):') || '';
-            var id = events.length ? Math.max.apply(null, events.map(function(e) { return e.id; })) + 1 : 1;
-            events.push({ id: id, name: name, date: date, location: location, desc: desc });
-            saveEvents();
-            renderSection('events');
+        window.showBlogForm = function(id) {
+            var posts = apiSync('/content/admin/blog', 'GET').posts || [];
+            var p = id ? posts.filter(function(e) { return e.id === id; })[0] : null;
+            var formDiv = document.getElementById('blogForm');
+            formDiv.style.display = 'block';
+            formDiv.innerHTML =
+                '<div class="admin-card" style="border:1px solid rgba(192,132,62,0.2)">' +
+                '<h3 style="color:#c0843e;margin-bottom:12px">' + (p ? 'Editeaza articol' : 'Articol nou') + '</h3>' +
+                '<div class="admin-setting"><label>Titlu</label><input type="text" id="bfTitle" class="admin-input" value="' + (p ? p.title.replace(/"/g, '&quot;') : '') + '"></div>' +
+                '<div class="admin-setting"><label>Autor</label><input type="text" id="bfAuthor" class="admin-input" value="' + (p ? (p.author || '').replace(/"/g, '&quot;') : '') + '"></div>' +
+                '<div class="admin-setting"><label>Continut</label><textarea id="bfContent" class="admin-input" style="height:200px">' + (p ? p.content.replace(/</g, '&lt;') : '') + '</textarea></div>' +
+                '<div style="display:flex;gap:10px;margin-top:12px">' +
+                '<button class="admin-btn" onclick="saveBlogPost(' + (p ? p.id : 'null') + ')">' + (p ? 'Salveaza' : 'Adauga') + '</button> ' +
+                '<button class="admin-btn" style="background:transparent;border-color:rgba(255,255,255,0.06);color:#6a5a4a" onclick="document.getElementById(\'blogForm\').style.display=\'none\'">Anuleaza</button>' +
+                '</div></div>';
         };
 
-        window.editEvent = function(id) {
-            var ev = events.filter(function(e) { return e.id === id; })[0];
-            if (!ev) return;
-            var name = prompt('Nume:', ev.name);
-            if (!name) return;
-            var date = prompt('Data:', ev.date);
-            if (!date) return;
-            var location = prompt('Locatia:', ev.location);
-            if (!location) return;
-            ev.name = name; ev.date = date; ev.location = location;
-            saveEvents();
-            renderSection('events');
+        window.saveBlogPost = function(id) {
+            var data = {
+                title: document.getElementById('bfTitle').value.trim(),
+                author: document.getElementById('bfAuthor').value.trim() || 'Admin',
+                content: document.getElementById('bfContent').value.trim()
+            };
+            if (!data.title || !data.content) { alert('Titlu si continut obligatorii'); return; }
+            var res = id
+                ? apiSync('/content/admin/blog/' + id, 'PUT', data)
+                : apiSync('/content/admin/blog', 'POST', data);
+            if (res.ok) renderSection('blog');
+            else alert(res.error);
+        };
+
+        window.deleteBlogPost = function(id) {
+            apiSync('/content/admin/blog/' + id, 'DELETE');
+            renderSection('blog');
+        };
+
+        window.savePageContent = function(key) {
+            var el = document.getElementById('pg_' + key);
+            var val = el ? el.value : '';
+            apiSync('/content/admin/site-content', 'PUT', { key: key, title: '', content: val });
+            renderSection('pages');
+        };
+
+        window.showEventForm = function(id) {
+            var events = getEvents();
+            var ev = id ? events.filter(function(e) { return e.id === id; })[0] : null;
+            var formDiv = document.getElementById('eventForm');
+            formDiv.style.display = 'block';
+            formDiv.innerHTML =
+                '<div class="admin-card" style="border:1px solid rgba(192,132,62,0.2)">' +
+                '<h3 style="color:#c0843e;margin-bottom:12px">' + (ev ? 'Editeaza eveniment' : 'Eveniment nou') + '</h3>' +
+                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+                '<div><label style="color:#8a7a6a;font-size:0.8rem">Nume</label><input type="text" id="efName" class="admin-input" value="' + (ev ? ev.name : '') + '"></div>' +
+                '<div><label style="color:#8a7a6a;font-size:0.8rem">Locatie</label><input type="text" id="efLocation" class="admin-input" value="' + (ev ? ev.location : '') + '"></div>' +
+                '<div><label style="color:#8a7a6a;font-size:0.8rem">Data inceput</label><input type="date" id="efStartDate" class="admin-input" value="' + (ev ? ev.date : '') + '"></div>' +
+                '<div><label style="color:#8a7a6a;font-size:0.8rem">Data sfarsit</label><input type="date" id="efEndDate" class="admin-input" value="' + (ev ? ev.endDate : '') + '"></div>' +
+                '<div><label style="color:#8a7a6a;font-size:0.8rem">Ora inceput</label><input type="time" id="efStartTime" class="admin-input" value="' + (ev ? ev.startTime : '') + '"></div>' +
+                '<div><label style="color:#8a7a6a;font-size:0.8rem">Ora sfarsit</label><input type="time" id="efEndTime" class="admin-input" value="' + (ev ? ev.endTime : '') + '"></div>' +
+                '</div>' +
+                '<div><label style="color:#8a7a6a;font-size:0.8rem">Descriere</label><textarea id="efDesc" class="admin-input" style="height:60px">' + (ev ? (ev.description || '') : '') + '</textarea></div>' +
+                '<div style="display:flex;gap:10px;margin-top:12px">' +
+                '<button class="admin-btn" onclick="saveEvent(' + (ev ? ev.id : 'null') + ')">' + (ev ? 'Salveaza' : 'Adauga') + '</button> ' +
+                '<button class="admin-btn" style="background:transparent;border-color:rgba(255,255,255,0.06);color:#6a5a4a" onclick="document.getElementById(\'eventForm\').style.display=\'none\'">Anuleaza</button>' +
+                '</div></div>';
+        };
+
+        window.saveEvent = function(id) {
+            var data = {
+                name: document.getElementById('efName').value.trim(),
+                startDate: document.getElementById('efStartDate').value,
+                endDate: document.getElementById('efEndDate').value,
+                startTime: document.getElementById('efStartTime').value,
+                endTime: document.getElementById('efEndTime').value,
+                location: document.getElementById('efLocation').value.trim(),
+                description: document.getElementById('efDesc').value.trim()
+            };
+            if (!data.name || !data.startDate || !data.location) {
+                alert('Numele, data de inceput si locatia sunt obligatorii');
+                return;
+            }
+            var res = id
+                ? apiSync('/admin/events/' + id, 'PUT', data)
+                : apiSync('/admin/events', 'POST', data);
+            if (res.ok) { renderSection('events'); }
+            else { alert(res.error); }
         };
 
         window.deleteEvent = function(id) {
-            if (!confirm('Stergi evenimentul?')) return;
-            events = events.filter(function(e) { return e.id !== id; });
-            saveEvents();
+            apiSync('/admin/events/' + id, 'DELETE');
             renderSection('events');
+        };
+
+        window.restoreEvent = function(id) {
+            apiSync('/admin/events/' + id + '/restore', 'POST');
+            renderSection('trash');
+        };
+
+        window.permanentDeleteEvent = function(id) {
+            apiSync('/admin/events/' + id + '/permanent', 'DELETE');
+            renderSection('trash');
         };
 
         window.addSubscriber = function() {
             var email = prompt('Email subscriptie:');
             if (!email) return;
-            subscribers.push({ email: email, date: new Date().toLocaleDateString('ro-RO') });
-            saveSubscribers();
-            renderSection('subscriptions');
+            var res = apiSync('/admin/subscribers', 'POST', { email: email });
+            if (res.ok) { renderSection('subscriptions'); }
+            else { alert(res.error); }
         };
 
-        window.deleteSubscriber = function(index) {
+        window.deleteSubscriber = function(id) {
             if (!confirm('Stergi subscriptia?')) return;
-            subscribers.splice(index, 1);
-            saveSubscribers();
-            renderSection('subscriptions');
+            var res = apiSync('/admin/subscribers/' + id, 'DELETE');
+            if (res.ok) { renderSection('subscriptions'); }
+            else { alert(res.error); }
         };
 
         window.sendNotification = function() {
             var select = document.getElementById('notifEvent');
             if (!select) return;
             var evId = parseInt(select.value);
-            var ev = events.filter(function(e) { return e.id === evId; })[0];
-            if (!ev || !subscribers.length) {
-                alert('Nu exista subscriptii sau evenimentul nu a fost gasit.');
-                return;
-            }
-            alert('Notificare trimisa la ' + subscribers.length + ' subscriptii pentru: ' + ev.name + ' (pe backend s-ar trimite emailuri reale)');
+            var res = apiSync('/admin/notify', 'POST', { eventId: evId });
+            if (res.ok) { alert(res.message); }
+            else { alert(res.error); }
         };
 
         window.promoteUser = function(username) {
             if (!confirm('Promovezi pe @"' + username + '" la administrator?')) return;
-            var result = NIDAuth.promoteToAdmin(username);
-            if (result.ok) { renderSection('users'); }
-            else { alert(result.error); }
+            var res = apiSync('/admin/users/promote', 'POST', { username: username });
+            if (res.ok) { renderSection('users'); }
+            else { alert(res.error); }
         };
 
-        window.banIP = function() {
-            var ip = prompt('Adresa IP de blocat (ex: 192.168.1.1):');
-            if (!ip) return;
-            if (bannedIPs.some(function(b) { return b.ip === ip; })) { alert('IP-ul este deja blocat.'); return; }
-            bannedIPs.push({ ip: ip, date: new Date().toLocaleDateString('ro-RO'), reason: 'Blocat manual' });
-            saveBans();
-            renderSection('bans');
+        window.editUserEmail = function(username) {
+            var users = getUsers();
+            var user = null;
+            for (var i = 0; i < users.length; i++) { if (users[i].username === username) { user = users[i]; break; } }
+            if (!user) { alert('Utilizator negasit.'); return; }
+            var newEmail = prompt('Email nou pentru @"' + username + '":', user.email);
+            if (!newEmail) return;
+            var res = apiSync('/admin/users/email', 'POST', { username: username, newEmail: newEmail });
+            if (res.ok) { renderSection('users'); }
+            else { alert(res.error); }
         };
 
-        window.unbanIP = function(index) {
-            if (!confirm('Deblochezi IP-ul ' + bannedIPs[index].ip + '?')) return;
-            bannedIPs.splice(index, 1);
-            saveBans();
-            renderSection('bans');
+        window.banIdentifier = function() {
+            var identifier = prompt('Identificator de blocat (username sau IP):');
+            if (!identifier) return;
+            var res = apiSync('/admin/bans', 'POST', { identifier: identifier, reason: 'Blocat manual' });
+            if (res.ok) { renderSection('bans'); }
+            else { alert(res.error); }
+        };
+
+        window.unbanIdentifier = function(id) {
+            if (!confirm('Deblochezi aceasta inregistrare?')) return;
+            var res = apiSync('/admin/bans/' + id, 'DELETE');
+            if (res.ok) { renderSection('bans'); }
+            else { alert(res.error); }
+        };
+
+        window.toggleUserMenu = function(e, username, isAdmin) {
+            e.stopPropagation();
+            document.querySelectorAll('.user-dropdown').forEach(function(m) {
+                if (m.id !== 'userMenu_' + username) m.style.display = 'none';
+            });
+            var menu = document.getElementById('userMenu_' + username);
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        };
+
+        window.banUserQuick = function(username) {
+            document.querySelectorAll('.user-dropdown').forEach(function(m) { m.style.display = 'none'; });
+            var users = getUsers();
+            var user = null;
+            for (var i = 0; i < users.length; i++) { if (users[i].username === username) { user = users[i]; break; } }
+            if (!user) { alert('Utilizator negasit.'); return; }
+            apiSync('/admin/bans', 'POST', { identifier: username, reason: 'Blocat din panoul de utilizatori' });
+            renderSection('users');
         };
 
         window.banByUsername = function() {
-            var username = document.getElementById('banUsername');
-            if (!username || !username.value) { alert('Introdu un username.'); return; }
-            var users = NIDAuth.getAllUsers();
-            var user = null;
-            for (var i = 0; i < users.length; i++) {
-                if (users[i].username === username.value.trim().toLowerCase()) { user = users[i]; break; }
-            }
-            if (!user) { alert('Username-ul nu exista.'); return; }
-            if (bannedIPs.some(function(b) { return b.ip === user.username; })) { alert('Utilizatorul este deja blocat.'); return; }
-            bannedIPs.push({ ip: user.username + ' (username)', date: new Date().toLocaleDateString('ro-RO'), reason: 'Blocat dupa username: ' + user.email });
-            saveBans();
-            username.value = '';
-            renderSection('bans');
+            var input = document.getElementById('banUsername');
+            if (!input || !input.value) { alert('Introdu un username.'); return; }
+            var username = input.value.trim().toLowerCase();
+            var users = getUsers();
+            var found = false;
+            for (var i = 0; i < users.length; i++) { if (users[i].username === username) { found = true; break; } }
+            if (!found) { alert('Username-ul nu exista.'); return; }
+            var res = apiSync('/admin/bans', 'POST', { identifier: username, reason: 'Blocat dupa username' });
+            if (res.ok) {
+                input.value = '';
+                renderSection('bans');
+            } else { alert(res.error); }
         };
 
         window.exportUsers = function() {
-            var users = NIDAuth.getAllUsers();
+            var users = getUsers();
             var text = 'Username,Email,Data inregistrare,Rol\n';
             users.forEach(function(u) {
                 text += u.username + ',' + u.email + ',' + new Date(u.createdAt).toLocaleDateString('ro-RO') + ',' + (u.isAdmin ? 'Admin' : 'Membru') + '\n';
@@ -286,6 +528,7 @@
         };
 
         window.exportSubscribers = function() {
+            var subscribers = getSubscribers();
             var text = 'Email,Data\n';
             subscribers.forEach(function(s) { text += s.email + ',' + s.date + '\n'; });
             var blob = new Blob([text], { type: 'text/csv' });
@@ -298,16 +541,11 @@
         window.resetSystem = function() {
             if (!confirm('ATENTIE! Aceasta actiune sterge TOTI utilizatorii si evenimentele. Esti sigur?')) return;
             if (!confirm('Ultima confirmare: vrei sa resetezi complet sistemul?')) return;
-            localStorage.removeItem('nid_users');
-            localStorage.removeItem('nid_events');
-            localStorage.removeItem('nid_subscribers');
-            localStorage.removeItem('nid_banned');
-            NIDAuth.seedAdmins();
-            events = [];
-            subscribers = [];
-            bannedIPs = [];
-            alert('Sistemul a fost resetat. Adminii默认 au fost recreati.');
-            renderSection('dashboard');
+            var res = apiSync('/admin/reset', 'POST');
+            if (res.ok) {
+                alert(res.message);
+                renderSection('dashboard');
+            } else { alert(res.error); }
         };
 
         document.querySelectorAll('.admin-nav-item').forEach(function(item) {
