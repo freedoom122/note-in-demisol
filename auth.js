@@ -70,6 +70,10 @@
             }
             if (!user) return { ok: false, error: 'Utilizator negasit' };
             if (user.password !== hashPassword(password)) return { ok: false, error: 'Parola incorecta' };
+            var bans = JSON.parse(localStorage.getItem('nid_banned')) || [];
+            if (bans.some(function(b) { return b.ip === user.username || b.ip.indexOf(user.username) !== -1; })) {
+                return { ok: false, error: 'Contul tau a fost blocat. Contacteaza administratorul.' };
+            }
             var session = { username: user.username, email: user.email, isAdmin: user.isAdmin, loginTime: Date.now() };
             saveSession(session);
             return { ok: true, user: session };
@@ -103,6 +107,23 @@
             return users.map(function(u) {
                 return { username: u.username, email: u.email, createdAt: u.createdAt, isAdmin: u.isAdmin };
             });
+        },
+
+        promoteToAdmin: function(username) {
+            var users = getUsers();
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].username === username.toLowerCase()) {
+                    users[i].isAdmin = true;
+                    saveUsers(users);
+                    return { ok: true };
+                }
+            }
+            return { ok: false, error: 'Utilizatorul nu a fost gasit' };
+        },
+
+        isBanned: function(username) {
+            var bans = JSON.parse(localStorage.getItem('nid_banned')) || [];
+            return bans.some(function(b) { return b.ip === username || b.ip.indexOf(username) !== -1; });
         },
 
         forgotPassword: function(email) {

@@ -32,6 +32,10 @@
                     <span class="nav-icon">&#9993;</span>
                     <span>Subscriptii</span>
                 </a>
+                <a href="#" class="admin-nav-item" data-section="bans">
+                    <span class="nav-icon">&#128683;</span>
+                    <span>Banuri</span>
+                </a>
                 <a href="#" class="admin-nav-item" data-section="settings">
                     <span class="nav-icon">&#9881;</span>
                     <span>Setari</span>
@@ -48,13 +52,15 @@
         </main>
     </div>
     <div id="adminDenied" style="display:none">
-        <div class="auth-page">
-            <div class="auth-card">
+        <div class="denied-page">
+            <div class="denied-card">
+                <div class="denied-code">446</div>
                 <h1>Acces <span>Interzis</span></h1>
-                <h2>Trebuie sa fii administrator</h2>
-                <p class="auth-info">Nu ai permisiunea de a accesa aceasta pagina.</p>
-                <a href="login.html" class="auth-btn" style="display:inline-block;text-decoration:none;width:auto;padding:10px 30px;margin-top:16px">Autentifica-te</a>
-                <a href="index.html" class="auth-back" style="display:block;margin-top:12px">&#8592; Inapoi la site</a>
+                <p class="denied-desc">Nu ai permisiunea de a accesa aceasta pagina.<br>Trebuie sa fii administrator.</p>
+                <div class="denied-actions">
+                    <a href="login.html" class="denied-btn primary">Autentifica-te</a>
+                    <a href="index.html" class="denied-btn secondary">&#8592; Inapoi la site</a>
+                </div>
             </div>
         </div>
     </div>
@@ -74,9 +80,11 @@
             { id: 3, name: 'Festival de Chitare', date: '20-22 Iul 2026', location: 'Parcul Central', desc: 'Concerte, workshop-uri si jam sessions' }
         ];
         var subscribers = JSON.parse(localStorage.getItem('nid_subscribers')) || [];
+        var bannedIPs = JSON.parse(localStorage.getItem('nid_banned')) || [];
         var currentSection = 'dashboard';
         function saveEvents() { localStorage.setItem('nid_events', JSON.stringify(events)); }
         function saveSubscribers() { localStorage.setItem('nid_subscribers', JSON.stringify(subscribers)); }
+        function saveBans() { localStorage.setItem('nid_banned', JSON.stringify(bannedIPs)); }
         function renderSection(section) {
             currentSection = section;
             document.querySelectorAll('.admin-nav-item').forEach(function(el) { el.classList.remove('active'); });
@@ -87,8 +95,9 @@
                     '<div class="admin-stat-card"><span class="stat-num">' + events.length + '</span><span class="stat-label">Evenimente</span></div>' +
                     '<div class="admin-stat-card"><span class="stat-num">' + (NIDAuth.getAllUsers().length || 0) + '</span><span class="stat-label">Utilizatori</span></div>' +
                     '<div class="admin-stat-card"><span class="stat-num">' + subscribers.length + '</span><span class="stat-label">Subscriptii</span></div>' +
+                    '<div class="admin-stat-card"><span class="stat-num">' + bannedIPs.length + '</span><span class="stat-label">IP-uri blocate</span></div>' +
                     '</div>' +
-                    '<div class="admin-card"><h3>Activitate recenta</h3><p>Sistemul functioneaza normal. ' + events.length + ' evenimente active.</p></div>';
+                    '<div class="admin-card"><h3>Activitate recenta</h3><p>Sistemul functioneaza normal. ' + events.length + ' evenimente active, ' + bannedIPs.length + ' IP-uri blocate.</p></div>';
             } else if (section === 'events') {
                 var html = '<div class="admin-card"><div class="admin-card-header"><h3>Evenimente</h3><button class="admin-btn" onclick="addEvent()">+ Adauga eveniment</button></div>';
                 if (!events.length) { html += '<p class="admin-empty">Nu exista evenimente.</p>'; }
@@ -108,12 +117,15 @@
                 content.innerHTML = html;
             } else if (section === 'users') {
                 var users = NIDAuth.getAllUsers();
-                var html = '<div class="admin-card"><h3>Utilizatori inregistrati</h3><p>Total: ' + users.length + ' conturi</p>';
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Utilizatori inregistrati</h3><span class="admin-badge">' + users.length + ' total</span></div>';
                 if (!users.length) { html += '<p class="admin-empty">Nu exista utilizatori.</p>'; }
                 else {
-                    html += '<table class="admin-table"><thead><tr><th>Username</th><th>Email</th><th>Data inregistrarii</th><th>Rol</th></tr></thead><tbody>';
+                    html += '<table class="admin-table"><thead><tr><th>Username</th><th>Email</th><th>Data</th><th>Rol</th><th>Actiuni</th></tr></thead><tbody>';
                     users.forEach(function(u) {
-                        html += '<tr><td>' + u.username + '</td><td>' + u.email + '</td><td>' + new Date(u.createdAt).toLocaleDateString('ro-RO') + '</td><td>' + (u.isAdmin ? '<span class="admin-badge">Admin</span>' : 'Membru') + '</td></tr>';
+                        var roleBadge = u.isAdmin ? '<span class="admin-badge admin">Admin</span>' : '<span class="admin-badge member">Membru</span>';
+                        var actionBtn = u.isAdmin ? '<span class="admin-text-muted">deja admin</span>' : '<button class="admin-btn small" onclick="promoteUser(\'' + u.username + '\')">Promoveaza</button>';
+                        if (u.username === 'alexczirai' || u.username === 'marcuadmin') actionBtn = '<span class="admin-text-muted">admin permanent</span>';
+                        html += '<tr><td>' + u.username + '</td><td>' + u.email + '</td><td>' + new Date(u.createdAt).toLocaleDateString('ro-RO') + '</td><td>' + roleBadge + '</td><td>' + actionBtn + '</td></tr>';
                     });
                     html += '</tbody></table>';
                 }
@@ -131,14 +143,31 @@
                 }
                 html += '</div>';
                 content.innerHTML = html;
+            } else if (section === 'bans') {
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>IP-uri blocate</h3><button class="admin-btn" onclick="banIP()">+ Blocheaza IP</button></div>';
+                if (!bannedIPs.length) { html += '<p class="admin-empty">Nu exista IP-uri blocate.</p>'; }
+                else {
+                    html += '<table class="admin-table"><thead><tr><th>Adresa IP</th><th>Data blocarii</th><th>Motiv</th><th>Actiuni</th></tr></thead><tbody>';
+                    bannedIPs.forEach(function(b, i) {
+                        html += '<tr><td>' + b.ip + '</td><td>' + b.date + '</td><td>' + (b.reason || 'Nespecificat') + '</td><td><button class="admin-btn small" onclick="unbanIP(' + i + ')">Deblocheaza</button></td></tr>';
+                    });
+                    html += '</tbody></table>';
+                }
+                html += '</div><div class="admin-card"><h3>Blocheaza utilizator dupa username</h3>' +
+                    '<p>Introdu username-ul pe care vrei sa-l blochezi.</p>' +
+                    '<div style="display:flex;gap:10px"><input type="text" id="banUsername" class="admin-input" placeholder="Username" style="flex:1;margin:0">' +
+                    '<button class="admin-btn" onclick="banByUsername()">Blocheaza</button></div></div>';
+                content.innerHTML = html;
             } else if (section === 'settings') {
                 content.innerHTML = '<div class="admin-card"><h3>Setari generale</h3>' +
                     '<div class="admin-setting"><label>Nume site</label><input type="text" class="admin-input" value="Note In Demisol"></div>' +
                     '<div class="admin-setting"><label>Email contact</label><input type="email" class="admin-input" value="contact@noteindemisol.ro"></div>' +
                     '<button class="admin-btn" onclick="alert(\'Setarile au fost salvate (demonstrativ)\')">Salveaza setarile</button></div>' +
                     '<div class="admin-card"><h3>Export date</h3><p>Exporta lista de utilizatori sau subscriptii.</p>' +
-                    '<button class="admin-btn" onclick="alert(\'Export utilizatori (demonstrativ)\')">Exporta utilizatori</button> ' +
-                    '<button class="admin-btn" onclick="alert(\'Export subscriptii (demonstrativ)\')">Exporta subscriptii</button></div>';
+                    '<button class="admin-btn" onclick="exportUsers()">Exporta utilizatori</button> ' +
+                    '<button class="admin-btn" onclick="exportSubscribers()">Exporta subscriptii</button></div>' +
+                    '<div class="admin-card" style="border-color:rgba(192,57,43,0.2)"><h3 style="color:#c0392b">Zona de risc</h3><p>Sterge toti utilizatorii si reseteaza sistemul.</p>' +
+                    '<button class="admin-btn danger" onclick="resetSystem()">Reseteaza tot</button></div>';
             }
         }
 
@@ -201,7 +230,84 @@
                 alert('Nu exista subscriptii sau evenimentul nu a fost gasit.');
                 return;
             }
-            alert('Notificare trimisa la ' + subscribers.length + ' subscriptii pentru: ' + ev.name + ' (demonstrativ - in productie ar trimite emailuri reale)');
+            alert('Notificare trimisa la ' + subscribers.length + ' subscriptii pentru: ' + ev.name + ' (pe backend s-ar trimite emailuri reale)');
+        };
+
+        window.promoteUser = function(username) {
+            if (!confirm('Promovezi pe @"' + username + '" la administrator?')) return;
+            var result = NIDAuth.promoteToAdmin(username);
+            if (result.ok) { renderSection('users'); }
+            else { alert(result.error); }
+        };
+
+        window.banIP = function() {
+            var ip = prompt('Adresa IP de blocat (ex: 192.168.1.1):');
+            if (!ip) return;
+            if (bannedIPs.some(function(b) { return b.ip === ip; })) { alert('IP-ul este deja blocat.'); return; }
+            bannedIPs.push({ ip: ip, date: new Date().toLocaleDateString('ro-RO'), reason: 'Blocat manual' });
+            saveBans();
+            renderSection('bans');
+        };
+
+        window.unbanIP = function(index) {
+            if (!confirm('Deblochezi IP-ul ' + bannedIPs[index].ip + '?')) return;
+            bannedIPs.splice(index, 1);
+            saveBans();
+            renderSection('bans');
+        };
+
+        window.banByUsername = function() {
+            var username = document.getElementById('banUsername');
+            if (!username || !username.value) { alert('Introdu un username.'); return; }
+            var users = NIDAuth.getAllUsers();
+            var user = null;
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].username === username.value.trim().toLowerCase()) { user = users[i]; break; }
+            }
+            if (!user) { alert('Username-ul nu exista.'); return; }
+            if (bannedIPs.some(function(b) { return b.ip === user.username; })) { alert('Utilizatorul este deja blocat.'); return; }
+            bannedIPs.push({ ip: user.username + ' (username)', date: new Date().toLocaleDateString('ro-RO'), reason: 'Blocat dupa username: ' + user.email });
+            saveBans();
+            username.value = '';
+            renderSection('bans');
+        };
+
+        window.exportUsers = function() {
+            var users = NIDAuth.getAllUsers();
+            var text = 'Username,Email,Data inregistrare,Rol\n';
+            users.forEach(function(u) {
+                text += u.username + ',' + u.email + ',' + new Date(u.createdAt).toLocaleDateString('ro-RO') + ',' + (u.isAdmin ? 'Admin' : 'Membru') + '\n';
+            });
+            var blob = new Blob([text], { type: 'text/csv' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'utilizatori_nid.csv';
+            a.click();
+        };
+
+        window.exportSubscribers = function() {
+            var text = 'Email,Data\n';
+            subscribers.forEach(function(s) { text += s.email + ',' + s.date + '\n'; });
+            var blob = new Blob([text], { type: 'text/csv' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'subscriptii_nid.csv';
+            a.click();
+        };
+
+        window.resetSystem = function() {
+            if (!confirm('ATENTIE! Aceasta actiune sterge TOTI utilizatorii si evenimentele. Esti sigur?')) return;
+            if (!confirm('Ultima confirmare: vrei sa resetezi complet sistemul?')) return;
+            localStorage.removeItem('nid_users');
+            localStorage.removeItem('nid_events');
+            localStorage.removeItem('nid_subscribers');
+            localStorage.removeItem('nid_banned');
+            NIDAuth.seedAdmins();
+            events = [];
+            subscribers = [];
+            bannedIPs = [];
+            alert('Sistemul a fost resetat. Adminii默认 au fost recreati.');
+            renderSection('dashboard');
         };
 
         document.querySelectorAll('.admin-nav-item').forEach(function(item) {
