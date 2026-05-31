@@ -16,31 +16,49 @@
         <div class="auth-card">
             <h1>Note <span>In</span> Demisol</h1>
             <h2>Autentificare</h2>
-            <form class="auth-form">
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Parolă" required>
+            <div id="authError" class="auth-error" style="display:none"></div>
+            <form class="auth-form" id="loginForm">
+                <input type="text" id="loginUser" placeholder="Username sau Email" required>
+                <input type="password" id="loginPass" placeholder="Parolă" required>
                 <button type="submit" class="auth-btn">Autentificare</button>
             </form>
+            <p class="auth-forgot"><a href="forgot-password.html">Ai uitat parola?</a></p>
             <div class="auth-divider">
                 <span>sau</span>
             </div>
             <div class="social-auth">
-                <button class="social-btn google">
+                <button class="social-btn google" onclick="alert('Login cu Google - configuratia backend necesara')">
                     <span class="social-icon">G</span>
                     <span>Continuă cu Google</span>
                 </button>
-                <button class="social-btn facebook">
+                <button class="social-btn facebook" onclick="alert('Login cu Facebook - configuratia backend necesara')">
                     <span class="social-icon">f</span>
                     <span>Continuă cu Facebook</span>
                 </button>
-                <button class="social-btn instagram">
+                <button class="social-btn instagram" onclick="alert('Login cu Instagram - configuratia backend necesara')">
                     <span class="social-icon">&#9400;</span>
                     <span>Continuă cu Instagram</span>
                 </button>
             </div>
-            <p class="auth-switch">Nu ai cont? <a href="signup.html">Înregistrează-te</a></p>
-            <a href="index.html" class="auth-back">&#8592; Înapoi la site</a>
+            <p class="auth-switch">Nu ai cont? <a href="signup.html">Inregistreaza-te</a></p>
+            <a href="index.html" class="auth-back">&#8592; Inapoi la site</a>
         </div>
     </div>
+    <script src="auth.js"></script>
+    <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var err = document.getElementById('authError');
+        var username = document.getElementById('loginUser').value;
+        var password = document.getElementById('loginPass').value;
+        var result = NIDAuth.login(username, password);
+        if (result.ok) {
+            window.location.href = 'index.html';
+        } else {
+            err.textContent = result.error;
+            err.style.display = 'block';
+        }
+    });
+    </script>
 </body>
 </html>

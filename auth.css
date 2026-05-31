@@ -186,3 +186,38 @@
 .auth-back:hover {
     color: #8a7a6a;
 }
+
+.auth-error {
+    background: rgba(192, 57, 43, 0.06);
+    border: 1px solid rgba(192, 57, 43, 0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: #c0392b;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.auth-forgot {
+    margin-top: 14px;
+    text-align: center;
+}
+
+.auth-forgot a {
+    color: #6a5a4a;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-forgot a:hover {
+    color: #c0843e;
+}
+
+.auth-info {
+    color: #6a5a4a;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    text-align: center;
+}

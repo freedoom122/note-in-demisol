@@ -11,6 +11,7 @@
         <img src="assets/background.png" alt="" class="bg-image">
     </div>
     <div class="bg-overlay"></div>
+    <div id="authBar" class="auth-bar"></div>
     <div class="container">
         <div class="menu-toggle" id="menuToggle">
             <div class="menu-icon">
@@ -37,6 +38,30 @@
             <span class="scroll-hint">Deschide meniul</span>
         </section>
     </div>
+    <script src="auth.js"></script>
     <script src="script.js"></script>
+    <script>
+    (function() {
+        var bar = document.getElementById('authBar');
+        function render() {
+            var session = NIDAuth.getSession();
+            if (session) {
+                var adminLink = session.isAdmin ? '<a href="admin.html" class="auth-bar-link admin-link">Admin</a>' : '';
+                bar.innerHTML = '<span class="auth-bar-user">' + session.username + '</span>' + adminLink + '<a href="#" class="auth-bar-link" id="logoutBtn">Logout</a>';
+                var logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        NIDAuth.logout();
+                        render();
+                    });
+                }
+            } else {
+                bar.innerHTML = '<a href="login.html" class="auth-bar-link">Login</a><a href="signup.html" class="auth-bar-link signup">Sign Up</a>';
+            }
+        }
+        render();
+    })();
+    </script>
 </body>
 </html>

@@ -226,3 +226,85 @@
         padding: 20px;
     }
 }
+
+.admin-cards-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-stat-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+}
+
+.admin-stat-card .stat-num {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #c0843e;
+    display: block;
+}
+
+.admin-stat-card .stat-label {
+    font-size: 0.75rem;
+    color: #6a5a4a;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+    display: block;
+}
+
+.admin-empty {
+    color: #5a4a3a;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 20px;
+}
+
+.admin-badge {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: rgba(192, 132, 62, 0.1);
+    color: #c0843e;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.admin-select {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    color: #e0e0e0;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+}
+
+.admin-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    color: #e0e0e0;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    margin-top: 6px;
+    margin-bottom: 14px;
+}
+
+.admin-setting label {
+    display: block;
+    font-size: 0.8rem;
+    color: #8a7a6a;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}

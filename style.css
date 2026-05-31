@@ -40,6 +40,64 @@ body {
     background: linear-gradient(135deg, rgba(26,26,46,0.92) 0%, rgba(26,26,46,0.8) 50%, rgba(20,20,40,0.95) 100%);
 }
 
+/* Auth Bar */
+.auth-bar {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-bar-link {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.25s;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #a09080;
+}
+
+.auth-bar-link:hover {
+    background: rgba(192, 132, 62, 0.08);
+    border-color: rgba(192, 132, 62, 0.15);
+    color: #c0843e;
+}
+
+.auth-bar-link.signup {
+    background: rgba(192, 132, 62, 0.08);
+    border-color: rgba(192, 132, 62, 0.15);
+    color: #c0843e;
+}
+
+.auth-bar-link.signup:hover {
+    background: rgba(192, 132, 62, 0.15);
+}
+
+.auth-bar-link.admin-link {
+    background: rgba(192, 132, 62, 0.12);
+    border-color: rgba(192, 132, 62, 0.25);
+    color: #c0843e;
+    font-weight: 500;
+}
+
+.auth-bar-link.admin-link:hover {
+    background: rgba(192, 132, 62, 0.2);
+}
+
+.auth-bar-user {
+    font-size: 0.8rem;
+    color: #8a7a6a;
+    letter-spacing: 1px;
+    padding: 8px 12px;
+}
+
 .container {
     position: relative;
     z-index: 1;
@@ -47,7 +105,6 @@ body {
     padding: 20px;
 }
 
-/* Menu Toggle Button */
 .menu-toggle {
     position: fixed;
     top: 25px;

@@ -12,105 +12,206 @@
         <img src="assets/background.png" alt="" class="bg-image">
     </div>
     <div class="bg-overlay"></div>
-    <div class="admin-layout">
+    <div class="admin-layout" id="adminLayout">
         <aside class="admin-sidebar">
             <h2>NID Admin</h2>
             <nav class="admin-nav">
-                <a href="#events" class="admin-nav-item active">
+                <a href="#" class="admin-nav-item active" data-section="dashboard">
+                    <span class="nav-icon">&#8962;</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="admin-nav-item" data-section="events">
                     <span class="nav-icon">&#9733;</span>
                     <span>Evenimente</span>
                 </a>
-                <a href="#subscriptions" class="admin-nav-item">
+                <a href="#" class="admin-nav-item" data-section="users">
+                    <span class="nav-icon">&#9830;</span>
+                    <span>Utilizatori</span>
+                </a>
+                <a href="#" class="admin-nav-item" data-section="subscriptions">
                     <span class="nav-icon">&#9993;</span>
                     <span>Subscriptii</span>
                 </a>
-                <a href="#members" class="admin-nav-item">
-                    <span class="nav-icon">&#9830;</span>
-                    <span>Membri</span>
-                </a>
-                <a href="#pages" class="admin-nav-item">
-                    <span class="nav-icon">&#9998;</span>
-                    <span>Pagini</span>
-                </a>
-                <a href="#settings" class="admin-nav-item">
+                <a href="#" class="admin-nav-item" data-section="settings">
                     <span class="nav-icon">&#9881;</span>
                     <span>Setari</span>
                 </a>
             </nav>
             <a href="index.html" class="admin-back">&#8592; Site</a>
         </aside>
-        <main class="admin-main">
+        <main class="admin-main" id="adminMain">
             <div class="admin-header">
                 <h1>Panou de Administrare</h1>
-                <p>Gestioneaza evenimentele si subscriptiile</p>
+                <p id="adminStatus">Bine ai venit, administrator</p>
             </div>
-            <section class="admin-section" id="events">
-                <h2>Evenimente</h2>
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <h3>Evenimente curente</h3>
-                        <button class="admin-btn">+ Adauga eveniment</button>
-                    </div>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Nume</th>
-                                <th>Data</th>
-                                <th>Locatie</th>
-                                <th>Actiuni</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Concert de Primavara</td>
-                                <td>15 Mai 2026</td>
-                                <td>Sala Concerturilor</td>
-                                <td>
-                                    <button class="admin-btn small">Editeaza</button>
-                                    <button class="admin-btn small danger">Sterge</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Workshop Tehnici</td>
-                                <td>1-3 Iun 2026</td>
-                                <td>Studioul Nostru</td>
-                                <td>
-                                    <button class="admin-btn small">Editeaza</button>
-                                    <button class="admin-btn small danger">Sterge</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="admin-card">
-                    <h3>Trimite notificare</h3>
-                    <p>Trimite email tuturor subscriptiilor despre un eveniment</p>
-                    <button class="admin-btn">Trimite email</button>
-                </div>
-            </section>
-            <section class="admin-section" id="subscriptions">
-                <h2>Subscriptii</h2>
-                <div class="admin-card">
-                    <h3>Lista subscriptiilor</h3>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Email</th>
-                                <th>Data inregistrarii</th>
-                                <th>Actiuni</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>exemplu@email.com</td>
-                                <td>10 Mai 2026</td>
-                                <td><button class="admin-btn small danger">Sterge</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <div id="adminContent"></div>
         </main>
     </div>
+    <div id="adminDenied" style="display:none">
+        <div class="auth-page">
+            <div class="auth-card">
+                <h1>Acces <span>Interzis</span></h1>
+                <h2>Trebuie sa fii administrator</h2>
+                <p class="auth-info">Nu ai permisiunea de a accesa aceasta pagina.</p>
+                <a href="login.html" class="auth-btn" style="display:inline-block;text-decoration:none;width:auto;padding:10px 30px;margin-top:16px">Autentifica-te</a>
+                <a href="index.html" class="auth-back" style="display:block;margin-top:12px">&#8592; Inapoi la site</a>
+            </div>
+        </div>
+    </div>
+    <script src="auth.js"></script>
+    <script>
+    (function() {
+        var session = NIDAuth.getSession();
+        if (!session || !session.isAdmin) {
+            document.getElementById('adminDenied').style.display = '';
+            document.getElementById('adminLayout').style.display = 'none';
+            return;
+        }
+        document.getElementById('adminStatus').textContent = 'Bine ai venit, ' + session.username;
+        var events = JSON.parse(localStorage.getItem('nid_events')) || [
+            { id: 1, name: 'Concert de Primavara', date: '15 Mai 2026', location: 'Sala Concerturilor', desc: 'Performanta live cu repertoriu clasic si modern' },
+            { id: 2, name: 'Workshop Tehnici Avansate', date: '1-3 Iun 2026', location: 'Studioul Nostru', desc: 'Tehnici de sweep picking, tapping si legato' },
+            { id: 3, name: 'Festival de Chitare', date: '20-22 Iul 2026', location: 'Parcul Central', desc: 'Concerte, workshop-uri si jam sessions' }
+        ];
+        var subscribers = JSON.parse(localStorage.getItem('nid_subscribers')) || [];
+        var currentSection = 'dashboard';
+        function saveEvents() { localStorage.setItem('nid_events', JSON.stringify(events)); }
+        function saveSubscribers() { localStorage.setItem('nid_subscribers', JSON.stringify(subscribers)); }
+        function renderSection(section) {
+            currentSection = section;
+            document.querySelectorAll('.admin-nav-item').forEach(function(el) { el.classList.remove('active'); });
+            document.querySelector('.admin-nav-item[data-section="' + section + '"]').classList.add('active');
+            var content = document.getElementById('adminContent');
+            if (section === 'dashboard') {
+                content.innerHTML = '<div class="admin-cards-row">' +
+                    '<div class="admin-stat-card"><span class="stat-num">' + events.length + '</span><span class="stat-label">Evenimente</span></div>' +
+                    '<div class="admin-stat-card"><span class="stat-num">' + (NIDAuth.getAllUsers().length || 0) + '</span><span class="stat-label">Utilizatori</span></div>' +
+                    '<div class="admin-stat-card"><span class="stat-num">' + subscribers.length + '</span><span class="stat-label">Subscriptii</span></div>' +
+                    '</div>' +
+                    '<div class="admin-card"><h3>Activitate recenta</h3><p>Sistemul functioneaza normal. ' + events.length + ' evenimente active.</p></div>';
+            } else if (section === 'events') {
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Evenimente</h3><button class="admin-btn" onclick="addEvent()">+ Adauga eveniment</button></div>';
+                if (!events.length) { html += '<p class="admin-empty">Nu exista evenimente.</p>'; }
+                else {
+                    html += '<table class="admin-table"><thead><tr><th>Nume</th><th>Data</th><th>Locatie</th><th>Actiuni</th></tr></thead><tbody>';
+                    events.forEach(function(ev) {
+                        html += '<tr><td>' + ev.name + '</td><td>' + ev.date + '</td><td>' + ev.location + '</td><td>' +
+                            '<button class="admin-btn small" onclick="editEvent(' + ev.id + ')">Editeaza</button> ' +
+                            '<button class="admin-btn small danger" onclick="deleteEvent(' + ev.id + ')">Sterge</button></td></tr>';
+                    });
+                    html += '</tbody></table>';
+                }
+                html += '</div><div class="admin-card"><h3>Trimite notificare</h3><p>Trimite email despre un eveniment tuturor subscriptiilor.</p>' +
+                    '<select id="notifEvent" class="admin-select">';
+                events.forEach(function(ev) { html += '<option value="' + ev.id + '">' + ev.name + '</option>'; });
+                html += '</select><button class="admin-btn" onclick="sendNotification()" style="margin-top:10px">Trimite email</button></div>';
+                content.innerHTML = html;
+            } else if (section === 'users') {
+                var users = NIDAuth.getAllUsers();
+                var html = '<div class="admin-card"><h3>Utilizatori inregistrati</h3><p>Total: ' + users.length + ' conturi</p>';
+                if (!users.length) { html += '<p class="admin-empty">Nu exista utilizatori.</p>'; }
+                else {
+                    html += '<table class="admin-table"><thead><tr><th>Username</th><th>Email</th><th>Data inregistrarii</th><th>Rol</th></tr></thead><tbody>';
+                    users.forEach(function(u) {
+                        html += '<tr><td>' + u.username + '</td><td>' + u.email + '</td><td>' + new Date(u.createdAt).toLocaleDateString('ro-RO') + '</td><td>' + (u.isAdmin ? '<span class="admin-badge">Admin</span>' : 'Membru') + '</td></tr>';
+                    });
+                    html += '</tbody></table>';
+                }
+                html += '</div>';
+                content.innerHTML = html;
+            } else if (section === 'subscriptions') {
+                var html = '<div class="admin-card"><div class="admin-card-header"><h3>Subscriptii la newsletter</h3><button class="admin-btn" onclick="addSubscriber()">+ Adauga manual</button></div>';
+                if (!subscribers.length) { html += '<p class="admin-empty">Nu exista subscriptii.</p>'; }
+                else {
+                    html += '<table class="admin-table"><thead><tr><th>Email</th><th>Data</th><th>Actiuni</th></tr></thead><tbody>';
+                    subscribers.forEach(function(s, i) {
+                        html += '<tr><td>' + s.email + '</td><td>' + s.date + '</td><td><button class="admin-btn small danger" onclick="deleteSubscriber(' + i + ')">Sterge</button></td></tr>';
+                    });
+                    html += '</tbody></table>';
+                }
+                html += '</div>';
+                content.innerHTML = html;
+            } else if (section === 'settings') {
+                content.innerHTML = '<div class="admin-card"><h3>Setari generale</h3>' +
+                    '<div class="admin-setting"><label>Nume site</label><input type="text" class="admin-input" value="Note In Demisol"></div>' +
+                    '<div class="admin-setting"><label>Email contact</label><input type="email" class="admin-input" value="contact@noteindemisol.ro"></div>' +
+                    '<button class="admin-btn" onclick="alert(\'Setarile au fost salvate (demonstrativ)\')">Salveaza setarile</button></div>' +
+                    '<div class="admin-card"><h3>Export date</h3><p>Exporta lista de utilizatori sau subscriptii.</p>' +
+                    '<button class="admin-btn" onclick="alert(\'Export utilizatori (demonstrativ)\')">Exporta utilizatori</button> ' +
+                    '<button class="admin-btn" onclick="alert(\'Export subscriptii (demonstrativ)\')">Exporta subscriptii</button></div>';
+            }
+        }
+
+        window.addEvent = function() {
+            var name = prompt('Numele evenimentului:');
+            if (!name) return;
+            var date = prompt('Data evenimentului:');
+            if (!date) return;
+            var location = prompt('Locatia:');
+            if (!location) return;
+            var desc = prompt('Descriere (optional):') || '';
+            var id = events.length ? Math.max.apply(null, events.map(function(e) { return e.id; })) + 1 : 1;
+            events.push({ id: id, name: name, date: date, location: location, desc: desc });
+            saveEvents();
+            renderSection('events');
+        };
+
+        window.editEvent = function(id) {
+            var ev = events.filter(function(e) { return e.id === id; })[0];
+            if (!ev) return;
+            var name = prompt('Nume:', ev.name);
+            if (!name) return;
+            var date = prompt('Data:', ev.date);
+            if (!date) return;
+            var location = prompt('Locatia:', ev.location);
+            if (!location) return;
+            ev.name = name; ev.date = date; ev.location = location;
+            saveEvents();
+            renderSection('events');
+        };
+
+        window.deleteEvent = function(id) {
+            if (!confirm('Stergi evenimentul?')) return;
+            events = events.filter(function(e) { return e.id !== id; });
+            saveEvents();
+            renderSection('events');
+        };
+
+        window.addSubscriber = function() {
+            var email = prompt('Email subscriptie:');
+            if (!email) return;
+            subscribers.push({ email: email, date: new Date().toLocaleDateString('ro-RO') });
+            saveSubscribers();
+            renderSection('subscriptions');
+        };
+
+        window.deleteSubscriber = function(index) {
+            if (!confirm('Stergi subscriptia?')) return;
+            subscribers.splice(index, 1);
+            saveSubscribers();
+            renderSection('subscriptions');
+        };
+
+        window.sendNotification = function() {
+            var select = document.getElementById('notifEvent');
+            if (!select) return;
+            var evId = parseInt(select.value);
+            var ev = events.filter(function(e) { return e.id === evId; })[0];
+            if (!ev || !subscribers.length) {
+                alert('Nu exista subscriptii sau evenimentul nu a fost gasit.');
+                return;
+            }
+            alert('Notificare trimisa la ' + subscribers.length + ' subscriptii pentru: ' + ev.name + ' (demonstrativ - in productie ar trimite emailuri reale)');
+        };
+
+        document.querySelectorAll('.admin-nav-item').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                renderSection(this.getAttribute('data-section'));
+            });
+        });
+        renderSection('dashboard');
+    })();
+    </script>
 </body>
 </html>

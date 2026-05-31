@@ -15,27 +15,28 @@
     <div class="auth-page">
         <div class="auth-card">
             <h1>Note <span>In</span> Demisol</h1>
-            <h2>Inregistrare</h2>
-            <form class="auth-form">
-                <input type="text" placeholder="Nume complet" required>
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Parola" required>
-                <input type="password" placeholder="Confirma parola" required>
+            <h2>Creare Cont</h2>
+            <div id="authError" class="auth-error" style="display:none"></div>
+            <form class="auth-form" id="signupForm">
+                <input type="text" id="signupUser" placeholder="Username" required>
+                <input type="email" id="signupEmail" placeholder="Email (obligatoriu)" required>
+                <input type="password" id="signupPass" placeholder="Parola (minim 6 caractere)" required>
+                <input type="password" id="signupPass2" placeholder="Confirma parola" required>
                 <button type="submit" class="auth-btn">Creaza cont</button>
             </form>
             <div class="auth-divider">
                 <span>sau</span>
             </div>
             <div class="social-auth">
-                <button class="social-btn google">
+                <button class="social-btn google" onclick="alert('Inregistrare cu Google - configuratia backend necesara')">
                     <span class="social-icon">G</span>
                     <span>Inregistrare cu Google</span>
                 </button>
-                <button class="social-btn facebook">
+                <button class="social-btn facebook" onclick="alert('Inregistrare cu Facebook - configuratia backend necesara')">
                     <span class="social-icon">f</span>
                     <span>Inregistrare cu Facebook</span>
                 </button>
-                <button class="social-btn instagram">
+                <button class="social-btn instagram" onclick="alert('Inregistrare cu Instagram - configuratia backend necesara')">
                     <span class="social-icon">&#9400;</span>
                     <span>Inregistrare cu Instagram</span>
                 </button>
@@ -44,5 +45,29 @@
             <a href="index.html" class="auth-back">&#8592; Inapoi la site</a>
         </div>
     </div>
+    <script src="auth.js"></script>
+    <script>
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var err = document.getElementById('authError');
+        var username = document.getElementById('signupUser').value;
+        var email = document.getElementById('signupEmail').value;
+        var password = document.getElementById('signupPass').value;
+        var pass2 = document.getElementById('signupPass2').value;
+        if (password !== pass2) {
+            err.textContent = 'Parolele nu coincid';
+            err.style.display = 'block';
+            return;
+        }
+        var result = NIDAuth.register(username, email, password);
+        if (result.ok) {
+            NIDAuth.login(username, password);
+            window.location.href = 'index.html';
+        } else {
+            err.textContent = result.error;
+            err.style.display = 'block';
+        }
+    });
+    </script>
 </body>
 </html>
