@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Note In demisol</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="background">
+        <img src="assets/background.png" alt="" class="bg-image">
+    </div>
+    <div class="bg-overlay"></div>
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <h2>NID Admin</h2>
+            <nav class="admin-nav">
+                <a href="#events" class="admin-nav-item active">
+                    <span class="nav-icon">&#9733;</span>
+                    <span>Evenimente</span>
+                </a>
+                <a href="#subscriptions" class="admin-nav-item">
+                    <span class="nav-icon">&#9993;</span>
+                    <span>Subscriptii</span>
+                </a>
+                <a href="#members" class="admin-nav-item">
+                    <span class="nav-icon">&#9830;</span>
+                    <span>Membri</span>
+                </a>
+                <a href="#pages" class="admin-nav-item">
+                    <span class="nav-icon">&#9998;</span>
+                    <span>Pagini</span>
+                </a>
+                <a href="#settings" class="admin-nav-item">
+                    <span class="nav-icon">&#9881;</span>
+                    <span>Setari</span>
+                </a>
+            </nav>
+            <a href="index.html" class="admin-back">&#8592; Site</a>
+        </aside>
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Panou de Administrare</h1>
+                <p>Gestioneaza evenimentele si subscriptiile</p>
+            </div>
+            <section class="admin-section" id="events">
+                <h2>Evenimente</h2>
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h3>Evenimente curente</h3>
+                        <button class="admin-btn">+ Adauga eveniment</button>
+                    </div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nume</th>
+                                <th>Data</th>
+                                <th>Locatie</th>
+                                <th>Actiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Concert de Primavara</td>
+                                <td>15 Mai 2026</td>
+                                <td>Sala Concerturilor</td>
+                                <td>
+                                    <button class="admin-btn small">Editeaza</button>
+                                    <button class="admin-btn small danger">Sterge</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Workshop Tehnici</td>
+                                <td>1-3 Iun 2026</td>
+                                <td>Studioul Nostru</td>
+                                <td>
+                                    <button class="admin-btn small">Editeaza</button>
+                                    <button class="admin-btn small danger">Sterge</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="admin-card">
+                    <h3>Trimite notificare</h3>
+                    <p>Trimite email tuturor subscriptiilor despre un eveniment</p>
+                    <button class="admin-btn">Trimite email</button>
+                </div>
+            </section>
+            <section class="admin-section" id="subscriptions">
+                <h2>Subscriptii</h2>
+                <div class="admin-card">
+                    <h3>Lista subscriptiilor</h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Data inregistrarii</th>
+                                <th>Actiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>exemplu@email.com</td>
+                                <td>10 Mai 2026</td>
+                                <td><button class="admin-btn small danger">Sterge</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

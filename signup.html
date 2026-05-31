@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inregistrare - Note In demisol</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+    <div class="background">
+        <img src="assets/background.png" alt="" class="bg-image">
+    </div>
+    <div class="bg-overlay"></div>
+    <div class="auth-page">
+        <div class="auth-card">
+            <h1>Note <span>In</span> Demisol</h1>
+            <h2>Inregistrare</h2>
+            <form class="auth-form">
+                <input type="text" placeholder="Nume complet" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Parola" required>
+                <input type="password" placeholder="Confirma parola" required>
+                <button type="submit" class="auth-btn">Creaza cont</button>
+            </form>
+            <div class="auth-divider">
+                <span>sau</span>
+            </div>
+            <div class="social-auth">
+                <button class="social-btn google">
+                    <span class="social-icon">G</span>
+                    <span>Inregistrare cu Google</span>
+                </button>
+                <button class="social-btn facebook">
+                    <span class="social-icon">f</span>
+                    <span>Inregistrare cu Facebook</span>
+                </button>
+                <button class="social-btn instagram">
+                    <span class="social-icon">&#9400;</span>
+                    <span>Inregistrare cu Instagram</span>
+                </button>
+            </div>
+            <p class="auth-switch">Ai deja cont? <a href="login.html">Autentifica-te</a></p>
+            <a href="index.html" class="auth-back">&#8592; Inapoi la site</a>
+        </div>
+    </div>
+</body>
+</html>

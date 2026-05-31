@@ -23,25 +23,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Treadmill fade-in/out for team members
-    var teamMembers = document.querySelectorAll('.team-scroll .team-member');
-    if (teamMembers.length) {
-        var observer = new IntersectionObserver(function(entries) {
+    // Treadmill fade-in for team photos
+    var fadeElements = document.querySelectorAll('.fade-on-scroll');
+    if (fadeElements.length) {
+        var fadeObserver = new IntersectionObserver(function(entries) {
             entries.forEach(function(entry) {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('member-visible');
-                    entry.target.classList.remove('member-hidden');
+                    entry.target.classList.add('fade-visible');
                 } else {
-                    entry.target.classList.remove('member-visible');
-                    entry.target.classList.add('member-hidden');
+                    entry.target.classList.remove('fade-visible');
                 }
             });
         }, {
-            threshold: 0.15,
-            rootMargin: '0px 0px -40px 0px'
+            threshold: 0.2,
+            rootMargin: '0px 0px -60px 0px'
         });
-        teamMembers.forEach(function(member) {
-            observer.observe(member);
+        fadeElements.forEach(function(el) {
+            fadeObserver.observe(el);
         });
     }
 });
