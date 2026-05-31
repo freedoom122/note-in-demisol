@@ -202,13 +202,14 @@ body {
 }
 
 .menu-item:nth-child(1) { transform: rotate(0deg) translateX(130px) rotate(0deg); }
-.menu-item:nth-child(2) { transform: rotate(45deg) translateX(130px) rotate(-45deg); }
-.menu-item:nth-child(3) { transform: rotate(90deg) translateX(130px) rotate(-90deg); }
-.menu-item:nth-child(4) { transform: rotate(135deg) translateX(130px) rotate(-135deg); }
-.menu-item:nth-child(5) { transform: rotate(180deg) translateX(130px) rotate(-180deg); }
-.menu-item:nth-child(6) { transform: rotate(225deg) translateX(130px) rotate(-225deg); }
-.menu-item:nth-child(7) { transform: rotate(270deg) translateX(130px) rotate(-270deg); }
-.menu-item:nth-child(8) { transform: rotate(315deg) translateX(130px) rotate(-315deg); }
+.menu-item:nth-child(2) { transform: rotate(40deg) translateX(130px) rotate(-40deg); }
+.menu-item:nth-child(3) { transform: rotate(80deg) translateX(130px) rotate(-80deg); }
+.menu-item:nth-child(4) { transform: rotate(120deg) translateX(130px) rotate(-120deg); }
+.menu-item:nth-child(5) { transform: rotate(160deg) translateX(130px) rotate(-160deg); }
+.menu-item:nth-child(6) { transform: rotate(200deg) translateX(130px) rotate(-200deg); }
+.menu-item:nth-child(7) { transform: rotate(240deg) translateX(130px) rotate(-240deg); }
+.menu-item:nth-child(8) { transform: rotate(280deg) translateX(130px) rotate(-280deg); }
+.menu-item:nth-child(9) { transform: rotate(320deg) translateX(130px) rotate(-320deg); }
 
 /* Home Section */
 .home-section {
@@ -236,11 +237,10 @@ body {
     color: #c0843e;
 }
 
-.home-section .subtitle {
-    font-size: 1.3rem;
-    color: #a09080;
-    letter-spacing: 8px;
-    text-transform: uppercase;
+.home-section .tagline {
+    font-size: 1.2rem;
+    color: #c0843e;
+    letter-spacing: 4px;
     margin-bottom: 24px;
     font-weight: 300;
 }
@@ -337,6 +337,21 @@ body {
     background: rgba(192, 132, 62, 0.05);
     border-color: rgba(192, 132, 62, 0.15);
     transform: translateY(-4px);
+}
+
+.member-photo {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border: 2px solid rgba(192, 132, 62, 0.3);
+    transition: all 0.3s ease;
+}
+
+.team-member:hover .member-photo {
+    border-color: #c0843e;
+    transform: scale(1.05);
 }
 
 .team-member h3 {
@@ -698,17 +713,18 @@ body {
     .menu-item .item-icon { font-size: 18px; }
     .menu-item .item-label { font-size: 8px; }
     .menu-item:nth-child(1) { transform: rotate(0deg) translateX(105px) rotate(0deg); }
-    .menu-item:nth-child(2) { transform: rotate(45deg) translateX(105px) rotate(-45deg); }
-    .menu-item:nth-child(3) { transform: rotate(90deg) translateX(105px) rotate(-90deg); }
-    .menu-item:nth-child(4) { transform: rotate(135deg) translateX(105px) rotate(-135deg); }
-    .menu-item:nth-child(5) { transform: rotate(180deg) translateX(105px) rotate(-180deg); }
-    .menu-item:nth-child(6) { transform: rotate(225deg) translateX(105px) rotate(-225deg); }
-    .menu-item:nth-child(7) { transform: rotate(270deg) translateX(105px) rotate(-270deg); }
-    .menu-item:nth-child(8) { transform: rotate(315deg) translateX(105px) rotate(-315deg); }
+    .menu-item:nth-child(2) { transform: rotate(40deg) translateX(105px) rotate(-40deg); }
+    .menu-item:nth-child(3) { transform: rotate(80deg) translateX(105px) rotate(-80deg); }
+    .menu-item:nth-child(4) { transform: rotate(120deg) translateX(105px) rotate(-120deg); }
+    .menu-item:nth-child(5) { transform: rotate(160deg) translateX(105px) rotate(-160deg); }
+    .menu-item:nth-child(6) { transform: rotate(200deg) translateX(105px) rotate(-200deg); }
+    .menu-item:nth-child(7) { transform: rotate(240deg) translateX(105px) rotate(-240deg); }
+    .menu-item:nth-child(8) { transform: rotate(280deg) translateX(105px) rotate(-280deg); }
+    .menu-item:nth-child(9) { transform: rotate(320deg) translateX(105px) rotate(-320deg); }
     .content-section { margin: 60px 16px; padding: 32px 24px; }
     .content-section h2 { font-size: 1.8rem; }
     .home-section h1 { font-size: 2.6rem; }
-    .home-section .subtitle { font-size: 1rem; letter-spacing: 4px; }
+    .home-section .tagline { font-size: 1rem; letter-spacing: 3px; }
     .menu-toggle { top: 18px; left: 18px; width: 46px; height: 46px; }
     .menu-icon { width: 18px; height: 13px; }
     .team-grid, .lesson-categories, .gallery-grid, .social-links { grid-template-columns: repeat(2, 1fr); gap: 14px; }
