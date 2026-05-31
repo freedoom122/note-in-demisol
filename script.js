@@ -22,4 +22,26 @@ document.addEventListener('DOMContentLoaded', function() {
             menuIcon.classList.remove('active');
         });
     });
+
+    // Treadmill fade-in/out for team members
+    var teamMembers = document.querySelectorAll('.team-scroll .team-member');
+    if (teamMembers.length) {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('member-visible');
+                    entry.target.classList.remove('member-hidden');
+                } else {
+                    entry.target.classList.remove('member-visible');
+                    entry.target.classList.add('member-hidden');
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: '0px 0px -40px 0px'
+        });
+        teamMembers.forEach(function(member) {
+            observer.observe(member);
+        });
+    }
 });
