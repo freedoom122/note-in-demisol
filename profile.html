@@ -137,8 +137,33 @@
         </div>
     </div>
     <script src="auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="emailjs-config.js"></script>
     <script>
     (function() {
+        emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+
+        function isEmailJSConfigured() {
+            return EMAILJS_CONFIG.PUBLIC_KEY.indexOf('aici_pune') === -1
+                && EMAILJS_CONFIG.SERVICE_ID.indexOf('aici_pune') === -1
+                && EMAILJS_CONFIG.TEMPLATE_ID.indexOf('aici_pune') === -1;
+        }
+
+        function trySendEmail(email, code, username, onOk, onFail) {
+            if (isEmailJSConfigured()) {
+                emailjs.send(EMAILJS_CONFIG.SERVICE_ID, EMAILJS_CONFIG.TEMPLATE_ID, {
+                    email: email,
+                    reset_code: code,
+                    username: username
+                }).then(onOk, function(err) {
+                    console.error('EmailJS error:', err);
+                    onFail('Nu s-a putut trimite emailul. Verifica configuratia EmailJS.');
+                });
+            } else {
+                onFail('Codul: ' + code + ' (EmailJS neconfigurat — cod afisat pe ecran)');
+            }
+        }
+
         var session = NIDAuth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
 
@@ -159,14 +184,26 @@
         document.getElementById('emailForm').addEventListener('submit', function(e) {
             e.preventDefault();
             var email = document.getElementById('newEmail').value;
+            var btn = e.target.querySelector('button');
+            btn.disabled = true; btn.classList.add('loading');
             var result = NIDAuth.requestEmailChange(email);
             if (result.ok) {
                 pendingNewEmail = email;
-                showMsg('Cod trimis la emailul curent. Cod: ' + result.code, 'success');
-                document.getElementById('emailForm').style.display = 'none';
-                document.getElementById('emailConfirmForm').style.display = 'block';
+                trySendEmail(session.email, result.code, session.username,
+                    function() {
+                        showMsg('Un cod de verificare a fost trimis la ' + session.email, 'success');
+                        document.getElementById('emailForm').style.display = 'none';
+                        document.getElementById('emailConfirmForm').style.display = 'block';
+                        btn.disabled = false; btn.classList.remove('loading');
+                    },
+                    function(errMsg) {
+                        showMsg(errMsg, 'error');
+                        btn.disabled = false; btn.classList.remove('loading');
+                    }
+                );
             } else {
                 showMsg(result.error, 'error');
+                btn.disabled = false; btn.classList.remove('loading');
             }
         });
 
@@ -192,13 +229,25 @@
 
         document.getElementById('passForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            var btn = e.target.querySelector('button');
+            btn.disabled = true; btn.classList.add('loading');
             var result = NIDAuth.requestPasswordChange();
             if (result.ok) {
-                showMsg('Cod trimis la ' + session.email + '. Cod: ' + result.code, 'success');
-                document.getElementById('passForm').style.display = 'none';
-                document.getElementById('passConfirmForm').style.display = 'block';
+                trySendEmail(session.email, result.code, session.username,
+                    function() {
+                        showMsg('Un cod de verificare a fost trimis la ' + session.email, 'success');
+                        document.getElementById('passForm').style.display = 'none';
+                        document.getElementById('passConfirmForm').style.display = 'block';
+                        btn.disabled = false; btn.classList.remove('loading');
+                    },
+                    function(errMsg) {
+                        showMsg(errMsg, 'error');
+                        btn.disabled = false; btn.classList.remove('loading');
+                    }
+                );
             } else {
                 showMsg(result.error, 'error');
+                btn.disabled = false; btn.classList.remove('loading');
             }
         });
 
