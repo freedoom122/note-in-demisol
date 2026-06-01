@@ -157,7 +157,7 @@
                     username: username
                 }).then(onOk, function(err) {
                     console.error('EmailJS error:', err);
-                    onFail('Nu s-a putut trimite emailul. Verifica configuratia EmailJS.');
+                    onFail('Codul: ' + code + ' (EmailJS a esuat — cod afisat pe ecran)');
                 });
             } else {
                 onFail('Codul: ' + code + ' (EmailJS neconfigurat — cod afisat pe ecran)');
