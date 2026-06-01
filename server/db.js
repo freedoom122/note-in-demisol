@@ -107,6 +107,12 @@ async function getDb() {
   try { db.run("INSERT OR IGNORE INTO site_content (key, title, content) VALUES ('social_youtube', 'https://youtube.com/@noteindemisol', '')"); } catch(e) {}
   try { db.run("INSERT OR IGNORE INTO site_content (key, title, content) VALUES ('social_instagram', 'https://instagram.com/noteindemisol', '')"); } catch(e) {}
   try { db.run("INSERT OR IGNORE INTO site_content (key, title, content) VALUES ('social_tiktok', 'https://tiktok.com/@noteindemisol', '')"); } catch(e) {}
+  try {
+    const bcrypt = require('bcryptjs');
+    const hash = bcrypt.hashSync('admin123', 12);
+    db.run("INSERT OR IGNORE INTO users (username, email, password, isAdmin, createdAt) VALUES ('alexczirai', 'alex@noteindemisol.ro', ?, 1, datetime('now'))", [hash]);
+    db.run("INSERT OR IGNORE INTO users (username, email, password, isAdmin, createdAt) VALUES ('marcuadmin', 'marcubrsv@gmail.com', ?, 1, datetime('now'))", [hash]);
+  } catch(e) {}
   save();
   return db;
 }
